@@ -1,0 +1,10 @@
+#database name
+database: "sbtest"
+#table name prefix
+tableName: "sbtest"
+#table count
+tableCount: 10
+#table record size
+tableSize: 1000
+# if table id is auto_incremental
+autoIncrement: "true"

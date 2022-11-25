@@ -1,0 +1,12 @@
+replace:
+- name: id
+  type: sequence
+  start: 100000
+  step: 1
+- name: price
+  type: random
+  range: 1,1000
+- name: name
+  type: file
+  path: replace/name.txt
+  

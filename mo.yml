@@ -1,0 +1,28 @@
+#jdbc
+jdbc:
+  driver: "com.mysql.cj.jdbc.Driver"
+  server:
+  - addr: "127.0.0.1:6001"
+  #- addr: "127.0.0.1:3306"
+  #- addr: "127.0.0.1:3306"
+  database:
+    default: "sbtest"
+  paremeter:
+    characterEncoding: "UTF-8"
+    useUnicode: "true"
+    autoReconnect: "true"
+    continueBatchOnError: "false"
+    useServerPrepStmts: "true"
+    alwaysSendSetIsolation: "false"
+    useLocalSessionState: "true"
+    zeroDateTimeBehavior: "CONVERT_TO_NULL"
+    failoverReadOnly: "false"
+    serverTimezone: "Asia/Shanghai"
+    socketTimeout: 10000
+    useSSL: "true"
+    enabledTLSProtocols : "TLSv1.2"
+#users
+user:
+  name: "dump"
+  password: "111"
+

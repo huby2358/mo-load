@@ -1,0 +1,14 @@
+replace:
+- name: id
+  type: random
+  range: 1,10000
+- name: i_id
+  type: sequence
+  start: 100001
+  step: 1
+- name: tbx
+  type: random
+  range: 1,1
+- name: kvalue
+  type: random
+  range: 1000,9999

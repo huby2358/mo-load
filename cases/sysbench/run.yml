@@ -1,0 +1,27 @@
+duration: 1200 #所有transaction的执行时间，单位分钟
+transaction:
+- name: "point_select"
+  vuser: 20
+  mode: 0
+  prepared: "false"
+  paras: INT({sequence}),STR({string})
+  script:
+  - sql: "select c from sbtest{tbx} where id = {id};"
+
+- name: "insert_delete"
+  vuser: 20
+  mode: 1
+  prepared: "false"
+  paras: INT({sequence}),STR({string})
+  script:
+  - sql: "insert into sbtest{tbx} values({i_id},4993,'83868641912-28773972837-60736120486-75162659906-27563526494-20381887404-41576422241-93426793964-56405065102-33518432330','67847967377-48000963322-62604785301-91415491898-96926520291');"
+  - sql: "delete from sbtest{tbx} where id = {i_id};"
+
+- name: "update_pk"
+  vuser: 20
+  mode: 1
+  prepared: "false"
+  paras: INT({sequence}),STR({string})
+  script:
+  - sql: "UPDATE sbtest{tbx} SET k=k+100 WHERE id = {id};"
+  - sql: "UPDATE sbtest{tbx} SET k=k-100 WHERE id = {id};"
