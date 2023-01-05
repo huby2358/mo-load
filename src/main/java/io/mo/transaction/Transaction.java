@@ -23,8 +23,6 @@ public class Transaction {
     public Transaction(String name,int theadnum){
 
         this.name = name;
-        if (name.length() > 9)
-            this.name = name.substring(0,9);
 
         this.theadnum = theadnum;
     }
@@ -124,8 +122,8 @@ public class Transaction {
         copy.setScript(this.getScript());
         copy.setPrepared(this.isPrepared());
         copy.setMode(this.getMode());
-        copy.setParas(this.getParas());
-        copy.parseParas();
+        //copy.setParas(this.getParas());
+        //copy.parseParas();
         return copy;
     }
 

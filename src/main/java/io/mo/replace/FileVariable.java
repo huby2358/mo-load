@@ -25,6 +25,8 @@ public class FileVariable implements Variable {
     private String path;
     private String[] values;
     private  int pos = 0;
+    private int scope = CONFIG.PARA_SCOPE_TRANSCATION;
+    
     private static Logger LOG = Logger.getLogger(MOPerfTest.class.getName());
 
     public FileVariable(String name, String path){
@@ -33,6 +35,17 @@ public class FileVariable implements Variable {
     }
 
     public String getName(){return this.name;}
+
+
+
+    public int getScope() {
+        return scope;
+    }
+
+    public void setScope(int scope) {
+        this.scope = scope;
+    }
+
 
     @Override
     public String getExpress() {

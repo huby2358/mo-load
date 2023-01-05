@@ -26,10 +26,11 @@ public class PreparedParaProducer extends Thread{
         while(!CONFIG.TIMEOUT){
             for(int i = 0; i < buffers.size(); i++){
                 PreparedPara para = buffers.get(i);
+                //System.out.println("para.int_values = " +i+": "+ para.int_values.size());
+
                 if(para.getType().equalsIgnoreCase("INT")){
                     if(para.int_values.size() < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD){
-
-                        para.int_values.add(Integer.parseInt(ReplaceConfigUtil.replace(para.getOrg_value())));
+                         para.int_values.add(Integer.parseInt(ReplaceConfigUtil.replace(para.getOrg_value())));
                     }
                 }
 

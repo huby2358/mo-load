@@ -3,10 +3,16 @@ replace:
   type: sequence
   start: 100000
   step: 1
-- name: price
+  #scope that para can effect, default is 0
+  #0:transaction, means value of para is stable in a transaction,and will change during different transactions
+  #1:statement, means value of para is stable in a sql statement, and will change during different sql statements
+  scope: 0
+- name: tbx
   type: random
-  range: 1,1000
-- name: name
-  type: file
-  path: replace/name.txt
+  range: 1,10
+  scope: 1
+  
+#- name: name
+#  type: file
+#  path: replace/name.txt
   

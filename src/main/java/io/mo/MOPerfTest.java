@@ -1,12 +1,15 @@
 package io.mo;
 
 import io.mo.conn.ConnectionOperation;
+import io.mo.para.PreparedPara;
 import io.mo.replace.Variable;
 import io.mo.result.ExecResult;
 import io.mo.thread.PreparedParaProducer;
 import io.mo.thread.ResultProcessor;
 import io.mo.thread.TransBufferProducer;
 import io.mo.thread.TransExecutor;
+import io.mo.transaction.PreparedSQLCommand;
+import io.mo.transaction.SQLScript;
 import io.mo.transaction.TransBuffer;
 import io.mo.transaction.Transaction;
 import io.mo.util.ReplaceConfigUtil;
@@ -72,8 +75,18 @@ public class MOPerfTest {
 
         for (int i = 0; i < transCount; i++) {
             transactions[i] = RunConfigUtil.getTransaction(i);
-            transactions[i].setPreparedParaProducer(preparedParaProducer);
-            execResult[i] = new ExecResult(transactions[i].getName());
+            //transactions[i].setPreparedParaProducer(preparedParaProducer);
+            if(transactions[i].isPrepared()){
+                SQLScript script = transactions[i].getScript();
+                PreparedSQLCommand[] commands = script.getPreparedCommands();
+                for(int j = 0; j < commands.length; j++){
+                    PreparedPara[] paras = commands[j].getPreparedParas();
+                    for( int k = 0; k < paras.length; k ++){
+                        preparedParaProducer.addPreparedPara(paras[k]);
+                    }
+                }
+            }
+            execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length());
             resultProcessor.addResult(execResult[i]);
         }
     }
@@ -177,7 +190,7 @@ public class MOPerfTest {
             //启动发送缓冲区生成器(线程)，循环生产新的事务脚本到缓冲区中
             transBufferProducer.start();
         }
-
+        
         if(preparedParaProducer.getBuffers().size() != 0){
             //启动发送缓冲区生成器(线程)，循环生产新的事务脚本到缓冲区中
             preparedParaProducer.start();

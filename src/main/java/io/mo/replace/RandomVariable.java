@@ -1,12 +1,26 @@
 package io.mo.replace;
 
+import io.mo.CONFIG;
+
 public class RandomVariable implements Variable {
     private String name;
     private int start;
     private int end;
-
+    private int scope = CONFIG.PARA_SCOPE_TRANSCATION;
+    
     public void init(){};
     public String getName(){return this.name;}
+
+
+
+    public int getScope() {
+        return scope;
+    }
+
+    public void setScope(int scope) {
+        this.scope = scope;
+    }
+
 
     public RandomVariable(String name, String range){
         this.name = name;

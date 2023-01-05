@@ -1,5 +1,6 @@
 package io.mo.util;
 
+import io.mo.CONFIG;
 import io.mo.MOPerfTest;
 import io.mo.replace.*;
 import io.mo.transaction.SQLScript;
@@ -32,16 +33,28 @@ public class ReplaceConfigUtil {
                 if(var.get("type").equals(CustomizedReplaceType.SEQUENCE)){
                     SequenceVariable seq = new SequenceVariable(var.get("name").toString(),Long.parseLong(var.get("start").toString()));
                     seq.setStep(Integer.parseInt(var.get("step").toString()));
+                    if(var.get("scope") != null){
+                        int scope = Integer.parseInt(var.get("scope").toString());
+                        seq.setScope(scope);
+                    }
                     vars.add(seq);
                 }
 
                 if(var.get("type").equals(CustomizedReplaceType.RANDOM)){
                     RandomVariable ran = new RandomVariable(var.get("name").toString(),var.get("range").toString());
+                    if(var.get("scope") != null){
+                        int scope = Integer.parseInt(var.get("scope").toString());
+                        ran.setScope(scope);
+                    }
                     vars.add(ran);
                 }
 
                 if(var.get("type").equals(CustomizedReplaceType.FILE)){
                     FileVariable file = new FileVariable(var.get("name").toString(),var.get("path").toString());
+                    if(var.get("scope") != null){
+                        int scope = Integer.parseInt(var.get("scope").toString());
+                        file.setScope(scope);
+                    }
                     vars.add(file);
                 }
             }
@@ -70,8 +83,16 @@ public class ReplaceConfigUtil {
     public synchronized static void replace(SQLScript script){
         for(int i = 0;i < vars.size();i++) {
             Variable var = (Variable) vars.get(i);
-            if(script.indexOf("{"+var.getName()+"}") != -1)
-                script.replaceAll("\\{"+var.getName()+"\\}",var.nextValue());
+            if(script.indexOf("{"+var.getName()+"}") != -1) {
+                if(var.getScope() == CONFIG.PARA_SCOPE_TRANSCATION) {
+                    script.replaceAll("\\{" + var.getName() + "\\}", var.nextValue());
+                    continue;
+                }
+                
+                if(var.getScope() == CONFIG.PARA_SCOPE_STATEMENT){
+                    script.replaceAll("\\{" + var.getName() + "\\}", var);
+                }
+            }
         }
 
         PreparedVariable.replace(script);

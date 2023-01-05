@@ -25,7 +25,7 @@ public class ResultProcessor extends Thread{
 
     private FileWriter error_writer;
     private FileWriter summary_writer;
-    private FileWriter result_writer;
+    private FileWriter[] trans_writer;
     private StringBuffer summary;
     
     private String stdout =null;
@@ -39,7 +39,7 @@ public class ResultProcessor extends Thread{
             res_dir.mkdirs();
         try {
             summary_writer = new FileWriter("report/summary.txt");
-            result_writer  = new FileWriter("report/result.txt");
+            //result_writer  = new FileWriter("report/result.txt");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -49,20 +49,23 @@ public class ResultProcessor extends Thread{
 
     public void addResult(ExecResult execResult){
         results.add(execResult);
+        
     }
 
 
     @Override
     public void run() {
-        if(stdout.equalsIgnoreCase("console")) {
-            System.out.println(getTitle());
+        trans_writer = new FileWriter[results.size()];
+        for(int i = 0; i < results.size(); i++){
+            try {
+                trans_writer[i] = new FileWriter("report/" + results.get(i).getName() +".data");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+            
+        System.out.println(getTitle());
         
-        try {
-            result_writer.write(getTitle());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         String[] objs = new String[results.size()*2];
         while (true){
             String format = "";
@@ -72,22 +75,19 @@ public class ResultProcessor extends Thread{
                     format += "%s\n";
                     objs[i*2] = getResult(i);
                     format += "%s\n";
-                    objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|";
+                    objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                     try {
                         Date now = new Date();
-                        result_writer.write("["+now+"]\n");
-                        result_writer.write(objs[i*2]+"\n");
-                        result_writer.flush();
+                        trans_writer[i].write("["+now+"] "+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
+                        trans_writer[i].flush();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
                 format += "\33["+(objs.length+1)+"A\r\n";
 
-                if(stdout.equalsIgnoreCase("console")) {
-                    System.out.printf(format, objs);
-                    System.out.printf("\033[" + objs.length + "B\r\n");
-                }
+                System.out.printf(format, objs);
+                System.out.printf("\033[" + objs.length + "B\r\n");
 
                 try {
                     summary_writer.write(getSummary());
@@ -104,12 +104,11 @@ public class ResultProcessor extends Thread{
                 format += "%s\n";
                 objs[i*2] = getResult(i);
                 format += "%s\n";
-                objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|";
+                objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                 try {
                     Date now = new Date();
-                    result_writer.write("["+now+"]\n");
-                    result_writer.write(objs[i*2]+"\n");
-                    result_writer.flush();
+                    trans_writer[i].write("["+now+"] "+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
+                    trans_writer[i].flush();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -117,8 +116,7 @@ public class ResultProcessor extends Thread{
             }
             format += "\033["+(objs.length+1)+"A\r\n";
 
-            if(stdout.equalsIgnoreCase("console"))
-                System.out.printf(format,objs);
+            System.out.printf(format,objs);
 
             for(int i = 0; i < results.size();i++){
                 results.get(i).flushErrors();
@@ -128,6 +126,14 @@ public class ResultProcessor extends Thread{
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+        }
+        
+        for(int i = 0; i < trans_writer.length; i++){
+            try {
+                trans_writer[i].close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -143,27 +149,46 @@ public class ResultProcessor extends Thread{
         String RT_MIN       = "      RT_MIN     ";
         String RT_AVG       = "      RT_AVG     ";
         String TPS          = "       TPS       ";
+        String QPS          = "       QPS       ";
         String SUCCESS      = "      SUCCESS    ";
         //String TOTAL        = "      TOTAL      ";
         String ERROR        = "      ERROR      ";
 
-        return  "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|\r\n"+
-                "|"+TRANSNAME+"|"+RT_MAX+"|"+RT_MIN+"|"+RT_AVG+"|"+TPS+"|"+SUCCESS+"|"+ERROR+"|\r\n"+
-                "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|";
+        return  "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|"+ cell_top +"|\r\n"+
+                "|"+TRANSNAME+"|"+RT_MAX+"|"+RT_MIN+"|"+RT_AVG+"|"+TPS+"|"+QPS+"|"+SUCCESS+"|"+ERROR+"|\r\n"+
+                "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|"+ cell_top +"|";
     }
 
     public String getResult(int turn){
         ExecResult execResult = results.get(turn);
-        String TRANSNAME = cell_blk.substring(0,4)+execResult.getName()+ cell_blk.substring(4+execResult.getName().length(), cell_blk.length());
+        String name = formatName(execResult.getName());
+        
+        String TRANSNAME = cell_blk.substring(0,2)+name+ cell_blk.substring(2+name.length(), cell_blk.length());
         String RT_MAX    = cell_blk.substring(0,6)+execResult.getMax_rt()+ cell_blk.substring(6+String.valueOf(execResult.getMax_rt()).length(), cell_blk.length());
         String RT_MIN    = cell_blk.substring(0,6)+execResult.getMin_rt()+ cell_blk.substring(6+String.valueOf(execResult.getMin_rt()).length(), cell_blk.length());
         String RT_AVG    = cell_blk.substring(0,6)+execResult.getAvg_rt()+ cell_blk.substring(6+String.valueOf(execResult.getAvg_rt()).length(), cell_blk.length());
         String TPS       = cell_blk.substring(0,7)+execResult.getTps()+ cell_blk.substring(7+String.valueOf(execResult.getTps()).length(), cell_blk.length());
+        String QPS       = cell_blk.substring(0,7)+execResult.getQps()+ cell_blk.substring(7+String.valueOf(execResult.getQps()).length(), cell_blk.length());
         String SUCCESS     = cell_blk.substring(0,6)+execResult.getTotalCount()+ cell_blk.substring(6+String.valueOf(execResult.getTotalCount()).length(), cell_blk.length());
         String ERROR     = cell_blk.substring(0,6)+execResult.getErrorCount()+ cell_blk.substring(6+String.valueOf(execResult.getErrorCount()).length(), cell_blk.length());
 
 
-        return "|"+TRANSNAME+"|"+RT_MAX+"|"+RT_MIN+"|"+RT_AVG+"|"+TPS+"|"+SUCCESS+"|"+ERROR+"|";
+        return "|"+TRANSNAME+"|"+RT_MAX+"|"+RT_MIN+"|"+RT_AVG+"|"+TPS+"|"+QPS+"|"+SUCCESS+"|"+ERROR+"|";
+    }
+    
+    public String getResultData(int turn){
+        ExecResult execResult = results.get(turn);
+        String TRANSNAME = execResult.getName();
+        long RT_MAX    = execResult.getMax_rt();
+        long RT_MIN    = execResult.getMin_rt();
+        String RT_AVG    = execResult.getAvg_rt();
+        int TPS       = execResult.getTps();
+        int QPS       = execResult.getQps();
+        long SUCCESS     = execResult.getTotalCount();
+        long ERROR     = execResult.getErrorCount();
+
+
+        return TRANSNAME+","+RT_MAX+","+RT_MIN+","+RT_AVG+","+TPS+","+QPS+","+SUCCESS+","+ERROR;
     }
 
     public String getSummary(){
@@ -175,6 +200,7 @@ public class ResultProcessor extends Thread{
             summary.append("RT_MIN : " + execResult.getMin_rt()+"\n");
             summary.append("RT_AVG : " + execResult.getAvg_rt()+"\n");
             summary.append("TPS : " + execResult.getTps()+"\n");
+            summary.append("QPS : " + execResult.getQps()+"\n");
             summary.append("SUCCESS : " + execResult.getTotalCount()+"\n");
             summary.append("ERROR : " + execResult.getErrorCount()+"\n");
             summary.append("\n");
@@ -192,29 +218,21 @@ public class ResultProcessor extends Thread{
         CONFIG.TIMEOUT = true;
         return true;
     }
+    
+    public String formatName(String name){
+        if(name.length() <= 12)
+            return name;
+        String prefix = name.substring(0,5);
+        String postfix = name.substring(name.length()-5,name.length());
+        return prefix + "**" + postfix;
+    } 
 
 
     public static void main(String args[]){
-        ExecResult e = new ExecResult("name");
-        e.setName("test1");
-        e.setMax_rt(1345);
-        e.setMin_rt(43);
-        e.setAvg_rt(97);
-        e.setTotalCount(321578218);
-        e.setErrorCount(4376);
-
-        ExecResult e1 = new ExecResult("name");
-        e1.setName("test2");
-        e1.setMax_rt(7843);
-        e1.setMin_rt(432);
-        e1.setAvg_rt(2341);
-        e1.setTotalCount(14321432);
-        e1.setErrorCount(4312);
-
-        ResultProcessor processor = new ResultProcessor();
-        processor.addResult(e);
-        processor.addResult(e1);
-        processor.start();
+        ExecResult e = new ExecResult("point_select_prepare");
+        ResultProcessor r = new ResultProcessor();
+        System.out.println(r.formatName("point_select_prepare"));
+        
 
     }
 }

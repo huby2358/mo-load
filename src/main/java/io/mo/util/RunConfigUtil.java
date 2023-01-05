@@ -1,6 +1,7 @@
 package io.mo.util;
 
 import io.mo.MOPerfTest;
+import io.mo.transaction.PreparedSQLCommand;
 import io.mo.transaction.SQLScript;
 import io.mo.transaction.Transaction;
 import org.apache.log4j.Logger;
@@ -47,11 +48,11 @@ public class RunConfigUtil {
                     LOG.info("transaction["+trans.getName()+"].prepared = "+prepared);
                 }
 
-                if(null != transM.get("paras")){
-                    String paras = (String)transM.get("paras");
-                    trans.setParas(paras);
-                    LOG.info("transaction["+trans.getName()+"].paras = "+paras);
-                }
+//                if(null != transM.get("paras")){
+//                    String paras = (String)transM.get("paras");
+//                    trans.setParas(paras);
+//                    LOG.info("transaction["+trans.getName()+"].paras = "+paras);
+//                }
 
                 List sqls = (List)transM.get("script");
                 SQLScript script = new SQLScript(sqls.size());
@@ -59,10 +60,20 @@ public class RunConfigUtil {
                 trans.setScript(script);
 
                 for(int j = 0;j < sqls.size();j++){
-                    Map sqlM = (Map)sqls.get(j);
-                    String sql = (String) sqlM.get("sql");
-                    script.addCommand(sql);
-                    //trans.setScript(sql);
+                    if(!trans.isPrepared()) {
+                        Map sqlM = (Map) sqls.get(j);
+                        String sql = (String) sqlM.get("sql");
+                        script.addCommand(sql);
+                        //trans.setScript(sql);
+                    }else {
+                        Map sqlM = (Map) sqls.get(j);
+                        String sql = (String) sqlM.get("sql");
+                        String paras = (String) sqlM.get("paras");
+                        PreparedSQLCommand command = new PreparedSQLCommand(sql);
+                        command.parseParas(paras);
+                        script.addPreparedCommand(command);
+                    }
+                    
                 }
                 transactions.add(trans);
             }
@@ -82,7 +93,9 @@ public class RunConfigUtil {
 
     public static long getExecDuration() { return (int)map.get("duration"); }
     
-    public static String getStdout(){return (String)map.get("stdout");}
+    public static String getStdout(){
+        return (String)map.get("stdout");
+    }
 
     public static void main(String args[]){
         for(int i = 0; i < RunConfigUtil.getTransactionNum(); i++){

@@ -21,9 +21,16 @@ public class ExecResult {
 
     private int tps = 0;
 
+    private int qps = 0;
+
     private long start = 0;
 
     private long end = 0;
+
+    
+
+    public int queryCount = 1;
+    
 
     public int getThreadnum() {
         return threadnum;
@@ -50,6 +57,16 @@ public class ExecResult {
 
     public ExecResult(String name){
         this.name = name;
+        try {
+            error_writer = new FileWriter("report/error/" + name + ".err");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ExecResult(String name,int queryCount){
+        this.name = name;
+        this.queryCount = queryCount;
         try {
             error_writer = new FileWriter("report/error/" + name + ".err");
         } catch (IOException e) {
@@ -126,7 +143,14 @@ public class ExecResult {
         return String.format("%.2f",(float) totalTime /(float)totalCount);
     }
 
+    public int getQueryCount() {
+        return queryCount;
+    }
 
+    public void setQueryCount(int queryCount) {
+        this.queryCount = queryCount;
+    }
+    
     public long getTotalTime() {
         return totalTime;
     }
@@ -184,6 +208,19 @@ public class ExecResult {
         this.terminated = terminated;
     }
 
+
+    public int getQps() {
+        if(this.end == 0)
+            return 0;
+        this.tps = (int)((totalCount*1000/(this.end-this.start)));
+        this.qps = this.tps * queryCount;
+        return qps;
+    }
+
+    public void setQps(int qps) {
+        this.qps = qps;
+    }
+    
     public void flushErrors(){
         if(this.errors.size() > 0){
             try {

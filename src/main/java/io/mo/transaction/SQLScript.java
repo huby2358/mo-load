@@ -1,24 +1,48 @@
 package io.mo.transaction;
 
+import io.mo.para.PreparedPara;
+import io.mo.replace.Variable;
+
 public class SQLScript {
     private int pos = 0;
     private String[] commands;
+    
+    private PreparedSQLCommand[] preparedSQLCommands;
 
     public SQLScript(int length){
         commands = new String[length];
+        preparedSQLCommands = new PreparedSQLCommand[length];
     }
 
     public String getCommand(int i){
         return commands[i];
     }
+    
+    public PreparedSQLCommand getPreparedCommand(int i){
+        return preparedSQLCommands[i];
+    }
+
+    public PreparedSQLCommand[] getPreparedCommands(){
+        return preparedSQLCommands;
+    } 
 
     public void addCommand(String command){
         commands[pos++] = command;
+    }
+    
+    public void addPreparedCommand(PreparedSQLCommand command){
+        preparedSQLCommands[pos++] = command;
     }
 
     public void replaceAll(String orc,String des){
         for(int i = 0; i < commands.length; i++){
             commands[i] = commands[i].replaceAll(orc,des);
+        }
+    }
+
+    public void replaceAll(String orc, Variable var){
+        for(int i = 0; i < commands.length; i++){
+            commands[i] = commands[i].replaceAll(orc,var.nextValue());
         }
     }
 

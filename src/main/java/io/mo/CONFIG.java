@@ -23,7 +23,9 @@ public class CONFIG {
 
     public static int DB_TRANSACTION_MODE = 1;
     public static int NOT_DB_TRANSACTION_MODE = 0;
-
+    
+    public static int PARA_SCOPE_TRANSCATION = 0;//变量的作用域为事务
+    public static int PARA_SCOPE_STATEMENT = 1;//变量的作用域为SQL
 
 
 }

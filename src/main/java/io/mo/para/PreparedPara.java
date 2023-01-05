@@ -50,6 +50,7 @@ public class PreparedPara {
     }
 
     public int getIntValue(){
+        //System.out.println("int_values.size = " + int_values.size());
         return int_values.poll();
     }
 

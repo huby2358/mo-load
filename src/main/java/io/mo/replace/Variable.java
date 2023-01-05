@@ -5,4 +5,6 @@ public interface Variable {
     void init();
     String nextValue();
     String getExpress();
+    
+    int getScope();
 }

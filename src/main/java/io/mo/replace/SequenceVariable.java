@@ -1,16 +1,25 @@
 package io.mo.replace;
 
+import io.mo.CONFIG;
+
 public class SequenceVariable implements Variable {
 
     private String name;
     private long start;
-
-
-
     private int step = 1;
+
+    private int scope = CONFIG.PARA_SCOPE_TRANSCATION;
 
     public void init(){};
     public String getName(){return this.name;}
+    
+    public int getScope() {
+        return scope;
+    }
+
+    public void setScope(int scope) {
+        this.scope = scope;
+    }
 
     public SequenceVariable(String name, long start){
         this.name = name;
