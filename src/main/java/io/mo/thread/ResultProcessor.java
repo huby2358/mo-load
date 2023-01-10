@@ -21,8 +21,11 @@ public class ResultProcessor extends Thread{
 
     private int turn = 0;
 
-    private String cell_top = "-----------------";
-    private String cell_blk = "                 ";
+    private String cell_top = "-----------";
+    private String cell_blk = "           ";
+
+    private String cell_top_name = "-----------------";
+    private String cell_blk_name = "                 ";
 
     private FileWriter error_writer;
     private FileWriter summary_writer;
@@ -77,7 +80,7 @@ public class ResultProcessor extends Thread{
                     format += "%s\n";
                     objs[i*2] = getResult(i);
                     format += "%s\n";
-                    objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
+                    objs[i*2+1] = "|"+ cell_top_name +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                     try {
                         Date now = new Date();
                         trans_writer[i].write(dateFormat.format(now)+","+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
@@ -106,7 +109,7 @@ public class ResultProcessor extends Thread{
                 format += "%s\n";
                 objs[i*2] = getResult(i);
                 format += "%s\n";
-                objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
+                objs[i*2+1] = "|"+ cell_top_name +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                 try {
                     Date now = new Date();
                     trans_writer[i].write(dateFormat.format(now)+","+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
@@ -147,32 +150,32 @@ public class ResultProcessor extends Thread{
 
     public String getTitle(){
         String TRANSNAME    = "    TRANSNAME    ";
-        String RT_MAX       = "      RT_MAX     ";
-        String RT_MIN       = "      RT_MIN     ";
-        String RT_AVG       = "      RT_AVG     ";
-        String TPS          = "       TPS       ";
-        String QPS          = "       QPS       ";
-        String SUCCESS      = "      SUCCESS    ";
+        String RT_MAX       = "   RT_MAX  ";
+        String RT_MIN       = "   RT_MIN  ";
+        String RT_AVG       = "   RT_AVG  ";
+        String TPS          = "    TPS    ";
+        String QPS          = "    QPS    ";
+        String SUCCESS      = "  SUCCESS  ";
         //String TOTAL        = "      TOTAL      ";
-        String ERROR        = "      ERROR      ";
+        String ERROR        = "   ERROR   ";
 
-        return  "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|"+ cell_top +"|\r\n"+
+        return  "|"+ cell_top_name +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|"+ cell_top +"|\r\n"+
                 "|"+TRANSNAME+"|"+RT_MAX+"|"+RT_MIN+"|"+RT_AVG+"|"+TPS+"|"+QPS+"|"+SUCCESS+"|"+ERROR+"|\r\n"+
-                "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|"+ cell_top +"|";
+                "|"+ cell_top_name +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|"+ cell_top +"|";
     }
 
     public String getResult(int turn){
         ExecResult execResult = results.get(turn);
         String name = formatName(execResult.getName());
         
-        String TRANSNAME = cell_blk.substring(0,2)+name+ cell_blk.substring(2+name.length(), cell_blk.length());
-        String RT_MAX    = cell_blk.substring(0,6)+execResult.getMax_rt()+ cell_blk.substring(6+String.valueOf(execResult.getMax_rt()).length(), cell_blk.length());
-        String RT_MIN    = cell_blk.substring(0,6)+execResult.getMin_rt()+ cell_blk.substring(6+String.valueOf(execResult.getMin_rt()).length(), cell_blk.length());
-        String RT_AVG    = cell_blk.substring(0,6)+execResult.getAvg_rt()+ cell_blk.substring(6+String.valueOf(execResult.getAvg_rt()).length(), cell_blk.length());
-        String TPS       = cell_blk.substring(0,7)+execResult.getTps()+ cell_blk.substring(7+String.valueOf(execResult.getTps()).length(), cell_blk.length());
-        String QPS       = cell_blk.substring(0,7)+execResult.getQps()+ cell_blk.substring(7+String.valueOf(execResult.getQps()).length(), cell_blk.length());
-        String SUCCESS     = cell_blk.substring(0,6)+execResult.getTotalCount()+ cell_blk.substring(6+String.valueOf(execResult.getTotalCount()).length(), cell_blk.length());
-        String ERROR     = cell_blk.substring(0,6)+execResult.getErrorCount()+ cell_blk.substring(6+String.valueOf(execResult.getErrorCount()).length(), cell_blk.length());
+        String TRANSNAME = cell_blk_name.substring(0,2)+name+ cell_blk_name.substring(2+name.length(), cell_blk_name.length());
+        String RT_MAX    = cell_blk.substring(0,3)+execResult.getMax_rt()+ cell_blk.substring(3+String.valueOf(execResult.getMax_rt()).length(), cell_blk.length());
+        String RT_MIN    = cell_blk.substring(0,3)+execResult.getMin_rt()+ cell_blk.substring(3+String.valueOf(execResult.getMin_rt()).length(), cell_blk.length());
+        String RT_AVG    = cell_blk.substring(0,3)+execResult.getAvg_rt()+ cell_blk.substring(3+String.valueOf(execResult.getAvg_rt()).length(), cell_blk.length());
+        String TPS       = cell_blk.substring(0,4)+execResult.getTps()+ cell_blk.substring(4+String.valueOf(execResult.getTps()).length(), cell_blk.length());
+        String QPS       = cell_blk.substring(0,4)+execResult.getQps()+ cell_blk.substring(4+String.valueOf(execResult.getQps()).length(), cell_blk.length());
+        String SUCCESS     = cell_blk.substring(0,2)+execResult.getTotalCount()+ cell_blk.substring(2+String.valueOf(execResult.getTotalCount()).length(), cell_blk.length());
+        String ERROR     = cell_blk.substring(0,3)+execResult.getErrorCount()+ cell_blk.substring(3+String.valueOf(execResult.getErrorCount()).length(), cell_blk.length());
 
 
         return "|"+TRANSNAME+"|"+RT_MAX+"|"+RT_MIN+"|"+RT_AVG+"|"+TPS+"|"+QPS+"|"+SUCCESS+"|"+ERROR+"|";
