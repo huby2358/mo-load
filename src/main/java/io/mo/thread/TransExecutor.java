@@ -238,7 +238,6 @@ public class TransExecutor implements Runnable {
 
                 while(!CONFIG.TIMEOUT){
                     SQLScript script = transBuffer.getScript();
-                    System.out.println(script.length());
                     try {
                         long beginTime = System.currentTimeMillis();
                         for(int i = 0; i < script.length();i++){
