@@ -86,7 +86,7 @@ public class MOPerfTest {
                     }
                 }
             }
-            execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length());
+            execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length(),transactions[i].getTheadnum());
             resultProcessor.addResult(execResult[i]);
         }
     }

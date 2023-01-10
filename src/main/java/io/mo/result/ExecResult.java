@@ -4,7 +4,9 @@ import io.mo.CONFIG;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ExecResult {
@@ -30,6 +32,12 @@ public class ExecResult {
     
 
     public int queryCount = 1;
+
+    
+
+    public String startTime = null;
+    public String endTime = null;
+    public int vuser = 0;
     
 
     public int getThreadnum() {
@@ -64,7 +72,7 @@ public class ExecResult {
         }
     }
 
-    public ExecResult(String name,int queryCount){
+    public ExecResult(String name,int queryCount, int vuser){
         this.name = name;
         this.queryCount = queryCount;
         try {
@@ -72,6 +80,12 @@ public class ExecResult {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        this.startTime = dateFormat.format(now);
+        
+        this.vuser = vuser;
     }
 
     public synchronized void setTime(String time){
@@ -242,5 +256,29 @@ public class ExecResult {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public int getVuser() {
+        return vuser;
+    }
+
+    public void setVuser(int vuser) {
+        this.vuser = vuser;
     }
 }

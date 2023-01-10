@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ResultProcessor extends Thread{
     private String stdout =null;
 
     private static Logger LOG = Logger.getLogger(ResultProcessor.class.getName());
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public ResultProcessor(){
         summary  = new StringBuffer();
@@ -78,7 +80,7 @@ public class ResultProcessor extends Thread{
                     objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                     try {
                         Date now = new Date();
-                        trans_writer[i].write("["+now+"] "+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
+                        trans_writer[i].write(dateFormat.format(now)+","+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
                         trans_writer[i].flush();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -107,7 +109,7 @@ public class ResultProcessor extends Thread{
                 objs[i*2+1] = "|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                 try {
                     Date now = new Date();
-                    trans_writer[i].write("["+now+"] "+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
+                    trans_writer[i].write(dateFormat.format(now)+","+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
                     trans_writer[i].flush();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -196,6 +198,9 @@ public class ResultProcessor extends Thread{
         for(int i = 0;i < results.size();i++){
             ExecResult execResult = results.get(i);
             summary.append("["+execResult.getName()+"]\n");
+            summary.append("START : " + execResult.getStartTime()+"\n");
+            summary.append("END : " + execResult.getEndTime()+"\n");
+            summary.append("VUSER : " + execResult.getVuser()+"\n");
             summary.append("RT_MAX : " + execResult.getMax_rt()+"\n");
             summary.append("RT_MIN : " + execResult.getMin_rt()+"\n");
             summary.append("RT_AVG : " + execResult.getAvg_rt()+"\n");
@@ -214,6 +219,8 @@ public class ResultProcessor extends Thread{
             ExecResult result = results.get(i);
             if(result.getThreadnum() != 0)
                 return false;
+            Date now = new Date();
+            result.setEndTime(dateFormat.format(now));
         }
         CONFIG.TIMEOUT = true;
         return true;
