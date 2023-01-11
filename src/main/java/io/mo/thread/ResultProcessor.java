@@ -39,11 +39,11 @@ public class ResultProcessor extends Thread{
 
     public ResultProcessor(){
         summary  = new StringBuffer();
-        File res_dir = new File("report/");
+        File res_dir = new File("report/"+CONFIG.EXECUTENAME+"/");
         if(!res_dir.exists())
             res_dir.mkdirs();
         try {
-            summary_writer = new FileWriter("report/summary.txt");
+            summary_writer = new FileWriter("report/"+CONFIG.EXECUTENAME+"/summary.txt");
             //result_writer  = new FileWriter("report/result.txt");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,7 +63,7 @@ public class ResultProcessor extends Thread{
         trans_writer = new FileWriter[results.size()];
         for(int i = 0; i < results.size(); i++){
             try {
-                trans_writer[i] = new FileWriter("report/" + results.get(i).getName() +".data");
+                trans_writer[i] = new FileWriter("report/" + CONFIG.EXECUTENAME + "/" + results.get(i).getName() +".data");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -242,7 +242,5 @@ public class ResultProcessor extends Thread{
         ExecResult e = new ExecResult("point_select_prepare");
         ResultProcessor r = new ResultProcessor();
         System.out.println(r.formatName("point_select_prepare"));
-        
-
     }
 }

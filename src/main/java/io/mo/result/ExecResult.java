@@ -2,6 +2,7 @@ package io.mo.result;
 
 import io.mo.CONFIG;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -65,8 +66,11 @@ public class ExecResult {
 
     public ExecResult(String name){
         this.name = name;
+        File res_dir = new File("report/"+CONFIG.EXECUTENAME+"/");
+        if(!res_dir.exists())
+            res_dir.mkdirs();
         try {
-            error_writer = new FileWriter("report/error/" + name + ".err");
+            error_writer = new FileWriter("report/"+ CONFIG.EXECUTENAME +"/error/" + name + ".err");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,8 +79,11 @@ public class ExecResult {
     public ExecResult(String name,int queryCount, int vuser){
         this.name = name;
         this.queryCount = queryCount;
+        File res_dir = new File("report/"+CONFIG.EXECUTENAME+"/");
+        if(!res_dir.exists())
+            res_dir.mkdirs();
         try {
-            error_writer = new FileWriter("report/error/" + name + ".err");
+            error_writer = new FileWriter("report/" + CONFIG.EXECUTENAME +"/error/" + name + ".err");
         } catch (IOException e) {
             e.printStackTrace();
         }

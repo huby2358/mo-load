@@ -37,7 +37,7 @@ public class MOPerfTest {
     //初始化当前执行的结果文件目录
     public static void initDir(){
         //File data_dirs = new File("report/data/");
-        File error_dir = new File("report/error/");
+        File error_dir = new File("report/" + CONFIG.EXECUTENAME + "/error/");
 //        if(!data_dirs.exists())
 //            data_dirs.mkdirs();
 
