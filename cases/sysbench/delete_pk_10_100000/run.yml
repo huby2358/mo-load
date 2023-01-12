@@ -1,4 +1,4 @@
-duration: 600 #所有transaction的执行时间，单位分钟
+duration: 10 #所有transaction的执行时间，单位分钟
 stdout: "console"
 transaction:
 - name: "delete_pk_10_100000"
