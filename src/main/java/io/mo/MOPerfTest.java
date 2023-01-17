@@ -129,8 +129,10 @@ public class MOPerfTest {
         for(int i = 0; i < transactions.length; i++){
             if(t_num == 0)
                 t_num = transactions[i].getTheadnum();
-            else
+            else {
                 transactions[i].setTheadnum(t_num);
+                execResult[i].setVuser(t_num);
+            }
             
             LOG.info(String.format("transaction[%s].tnum = %d", transactions[i].getName(),t_num));
             TransExecutor[] executors = new TransExecutor[t_num];
