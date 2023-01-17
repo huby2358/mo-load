@@ -63,7 +63,7 @@ public class TransExecutor implements Runnable {
                 this.transaction = this.transaction.copy();
                 for(int i = 0; i < count; i++) {
                     ps[i] = this.connection.prepareStatement(transaction.getScript().getPreparedCommand(i).getSql());
-                    LOG.error(String.format("Thread[id=%d] has prepared [%s]",id,transaction.getScript().getPreparedCommand(i).getSql()));
+                    LOG.debug(String.format("Thread[id=%d] has prepared [%s]",id,transaction.getScript().getPreparedCommand(i).getSql()));
                 }
             }else {
                 statement = this.connection.createStatement();
