@@ -243,6 +243,7 @@ public class MOPerfTest {
                     }
                     conns.get(i).close();
                 }
+                resultProcessor.join();
                 LOG.info("Program exit completely.");
             } catch (InterruptedException e) {
                 e.printStackTrace();
