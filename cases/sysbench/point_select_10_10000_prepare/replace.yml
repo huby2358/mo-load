@@ -9,6 +9,3 @@ replace:
 - name: tbx
   type: random
   range: 1,10
-- name: kvalue
-  type: random
-  range: 1000,9999

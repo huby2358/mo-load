@@ -1,0 +1,11 @@
+duration: 10 #所有transaction的执行时间，单位分钟
+stdout: "console"
+transaction:
+- name: "delete_pk_10_100000_prepare"
+  vuser: 10  
+  mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
+  prepared: "true"   #是否需要对script的sql进行prepare，如果为true，要求script中只能有一个sql，否则该参数失效
+  script:
+  - sql: "delete from sbtest{tbx} where id = {id};"
+    paras: INT({id})
+

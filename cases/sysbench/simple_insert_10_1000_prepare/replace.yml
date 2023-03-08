@@ -1,10 +1,10 @@
 replace:
 - name: id
   type: random
-  range: 1,10000
+  range: 1,1000
 - name: i_id
   type: sequence
-  start: 10001
+  start: 1001
   step: 1
 - name: tbx
   type: random

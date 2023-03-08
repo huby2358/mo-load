@@ -1,0 +1,13 @@
+#stdout=console, 过程数据输出到控制台和文件
+#stdout=file, 过程文件仅输出到文件
+stdout: "file"
+duration: 10 #所有transaction的执行时间，单位分钟
+transaction:
+  - name: "point_select_10_100_prepare"  #transaction名称
+    vuser: 50   #执行该transaction测试的并发量
+    mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
+    prepared: "true"   #是否需要对script的sql进行prepare，如果为true，要求script中只能有一个sql，否则该参数失效
+    #transaction的sql语句,可多条
+    script:
+      - sql: "select k from sbtest{tbx} where id = ?;"
+        paras: INT({id})
