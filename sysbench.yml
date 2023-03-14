@@ -5,6 +5,8 @@ tableName: "sbtest"
 #table count
 tableCount: 10
 #table record size
-tableSize: 1000
+tableSize: 10000
 # if table id is auto_incremental
-autoIncrement: "true"
+autoIncrement: "false"
+#batch size when loading data
+batchSize: 10000

@@ -180,53 +180,6 @@ public class TransExecutor implements Runnable {
                         }
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                     }
-                    
-//                    try {
-//                        for (int i = 0; i < paraSize; i++) {
-//                            for(int j = 0 ; j < ps.length; j++){
-//                                if(paras[i].isINT()){
-//                                    ps[j].setInt(i+1,paras[i].getIntValue());
-//                                }
-//                                if(paras[i].isSTR()){
-//                                    ps[j].setString(i+1,paras[i].getStrValue());
-//                                }
-//                            }
-//                        }
-//
-//                        long beginTime = System.currentTimeMillis();
-//                        for(int j = 0 ; j < ps.length; j++)
-//                            ps[j].execute();
-//                        long endTime = System.currentTimeMillis();
-//                        connection.commit();
-//                        
-//                        //将执行时间和结果保存在临时缓冲区里
-//                        rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
-//
-//                    }catch (SQLException e){
-//                        try {
-//                            if(connection == null || connection.isClosed()) {
-//                                connection = ConnectionOperation.getConnection();
-//                                if(connection == null){
-//                                    running = false;
-//                                    rtBuffer.setValid(false);
-//                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit",id));
-//                                    break;
-//                                }
-//                                connection.setAutoCommit(false);
-//                                for(int j = 0 ; j < ps.length; j++)
-//                                    ps[j] = connection.prepareStatement(transaction.getScript().getCommand(j));
-//                                execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
-//                                continue;
-//                            }
-//                            connection.rollback();
-//                        } catch (SQLException e1) {
-//                            e1.printStackTrace();
-//                        } catch (Exception ex) {
-//                            e.printStackTrace();
-//                        }
-//                        execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
-//                        continue;
-//                    }
                 }
             }
         }
@@ -275,7 +228,7 @@ public class TransExecutor implements Runnable {
             
             else {
 
-                SQLScript script = transBuffer.getScript();
+                SQLScript script = transaction.getScript();
                 while(!CONFIG.TIMEOUT){
                     try {
                         long beginTime = System.currentTimeMillis();
@@ -320,53 +273,6 @@ public class TransExecutor implements Runnable {
                         }
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                     }
-                    
-//                int paraSize = transaction.getParasList().length;
-//                PreparedPara[] paras = transaction.getParasList();
-//                while(!CONFIG.TIMEOUT){
-//                    try {
-//                        for (int i = 0; i < paraSize; i++) {
-//                            for(int j = 0 ; j < ps.length; j++){
-//                                if(paras[i].isINT()){
-//                                    ps[j].setInt(i+1,paras[i].getIntValue());
-//                                }
-//                                if(paras[i].isSTR()){
-//                                    ps[j].setString(i+1,paras[i].getStrValue());
-//                                }
-//                            }
-//                        }
-//
-//                        long beginTime = System.currentTimeMillis();
-//                        for(int j = 0 ; j < ps.length; j++)
-//                            ps[j].execute();
-//                        long endTime = System.currentTimeMillis();
-//
-//                        //将执行时间和结果保存在临时缓冲区里
-//                        rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
-//
-//                    }catch (SQLException e){
-//                        try {
-//                            if(connection == null || connection.isClosed()) {
-//                                connection = ConnectionOperation.getConnection();
-//                                if(connection == null){
-//                                    running = false;
-//                                    rtBuffer.setValid(false);
-//                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit",id));
-//                                    break;
-//                                }
-//                                for(int j = 0 ; j < ps.length; j++)
-//                                    ps[j] = connection.prepareStatement(transaction.getScript().getCommand(j));
-//                                execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
-//                                continue;
-//                            }
-//                        } catch (SQLException e1) {
-//                            e1.printStackTrace();
-//                        } catch (Exception ex) {
-//                            e.printStackTrace();
-//                        }
-//                        execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
-//                        continue;
-//                    }
                 }
             }
         }

@@ -45,6 +45,11 @@ public class SysbenchConfUtil {
         return (String)conf.get("autoIncrement");
     }
 
+    public static int getSysbenchBatchSize(){
+        if(conf == null) init();
+        return (int)conf.get("batchSize");
+    }
+
     public static void main(String[] args){
         System.out.println(getSysbenchDb());
         System.out.println(getSysbenchTableSize());

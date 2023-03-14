@@ -11,12 +11,12 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static io.mo.Sysbench.tbl_size;
-
 public class SysBenchLoader implements Runnable{
     
     private int id;
     private int size;
+    
+    private int batch_size;
     
     private boolean auto_incr = false;
     private Random random = new Random();
@@ -47,12 +47,17 @@ public class SysBenchLoader implements Runnable{
 
 
     private static Logger LOG = Logger.getLogger(SysBenchLoader.class.getName());
-    public SysBenchLoader(Connection con, int id, int size, boolean auto_incr, CountDownLatch latch){
+    public SysBenchLoader(Connection con, int id, int size, boolean auto_incr, int batch_size,CountDownLatch latch){
         this.id = id;
         this.size = size;
+        this.batch_size = batch_size;
         this.con = con;
         this.latch = latch;
         this.auto_incr = auto_incr;
+        
+        if(batch_size > size)
+            batch_size = size;
+        
     }
     
     @Override
@@ -62,27 +67,34 @@ public class SysBenchLoader implements Runnable{
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            
             if (auto_incr) {
                 //create table
                 stmt.execute(tbl_create_auto_ddl.replace("tablename", tbl_name));
                 //batch insert
                 long start = System.currentTimeMillis();
-                for (int j = 1; j < tbl_size + 1; j++) {
+                con.setAutoCommit(false);
+                for (int j = 1; j < size + 1; j++) {
                     String sql = String.format(insert_auto_dml,tbl_name,getRandom4Number(),getRandomChar(120),getRandomChar(60));
                     stmt.execute(sql);
+                    if(size > batch_size && j % batch_size == 0)
+                        con.commit();
                 }
+                con.commit();
                 long end = System.currentTimeMillis();
                 LOG.info(String.format("Table %s has been initialized completely, and cost:%s s", tbl_name, (end - start) / 1000));
             } else {
                 //create table
                 stmt.execute(tbl_create_ddl.replace("tablename", tbl_name));
                 //batch insert
+                con.setAutoCommit(false);
                 long start = System.currentTimeMillis();
-                for (int j = 1; j < tbl_size + 1; j++) {
+                for (int j = 1; j < size + 1; j++) {
                     String sql = String.format(insert_dml,tbl_name,j,getRandom4Number(),getRandomChar(120),getRandomChar(60));
                     stmt.execute(sql);
+                    if(size > batch_size && j % batch_size == 0)
+                        con.commit();
                 }
+                con.commit();
                 long end = System.currentTimeMillis();
                 LOG.info(String.format("Table %s has been initialized completely, and cost:%s s", tbl_name, (end - start) / 1000));
             }

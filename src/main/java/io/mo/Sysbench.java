@@ -20,6 +20,8 @@ public class Sysbench {
     public static int tbl_conut = SysbenchConfUtil.getSysbenchTableCount();
     public static int tbl_size = SysbenchConfUtil.getSysbenchTableSize();
     
+    public static int batch_size = SysbenchConfUtil.getSysbenchBatchSize();
+    
     public static String auto_incr = SysbenchConfUtil.getSysbenchAutoIncrement(); 
     
     public static Random random = new Random();
@@ -73,7 +75,7 @@ public class Sysbench {
                     System.exit(1);
                 }
                 
-                SysBenchLoader loader = new SysBenchLoader(conLoad, i, tbl_size, auto_incr.equalsIgnoreCase("true"), latch);
+                SysBenchLoader loader = new SysBenchLoader(conLoad, i, tbl_size, auto_incr.equalsIgnoreCase("true"), batch_size, latch);
                 executor.execute(loader);
             }
             latch.await();
