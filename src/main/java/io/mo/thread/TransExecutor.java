@@ -53,21 +53,20 @@ public class TransExecutor implements Runnable {
         this.transaction = this.transBuffer.getTransaction();
 
         this.connection = connection;
-
         this.barrier = barrier;
         this.id = id;
         try {
-            int count = transaction.getScript().length();
-            ps = new PreparedStatement[count];
-            if(transaction.isPrepared()){
-                this.transaction = this.transaction.copy();
-                for(int i = 0; i < count; i++) {
-                    ps[i] = this.connection.prepareStatement(transaction.getScript().getPreparedCommand(i).getSql());
-                    LOG.debug(String.format("Thread[id=%d] has prepared [%s]",id,transaction.getScript().getPreparedCommand(i).getSql()));
-                }
-            }else {
+//            int count = transaction.getScript().length();
+//            ps = new PreparedStatement[count];
+//            if(transaction.isPrepared()){
+//                this.transaction = this.transaction.copy();
+//                for(int i = 0; i < count; i++) {
+//                    ps[i] = this.connection.prepareStatement(transaction.getScript().getPreparedCommand(i).getOriginalSql());
+//                    LOG.debug(String.format("Thread[id=%d] has prepared [%s]",id,transaction.getScript().getPreparedCommand(i).getOriginalSql()));
+//                }
+//            }else {
                 statement = this.connection.createStatement();
-            }
+//            }
             //this.connection.prepareStatement();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -138,21 +137,22 @@ public class TransExecutor implements Runnable {
                     try {
                         long beginTime = System.currentTimeMillis();
                         for (int i = 0; i < script.length(); i++) {
-                            PreparedSQLCommand command = script.getPreparedCommand(i);
-                            PreparedPara[] paras = command.getPreparedParas();
-                            
-                            for (int j = 0; j < paras.length; j++) {
-                                if (paras[j].isINT()) {
-                                    ps[i].setInt(j + 1, paras[j].getIntValue());
-                                }
-                                if (paras[j].isSTR()) {
-                                    ps[i].setString(j + 1, paras[j].getStrValue());
-                                }
-                                ps[i].execute();
-                            }
+//                            PreparedSQLCommand command = script.getPreparedCommand(i);
+//                            PreparedPara[] paras = command.getPreparedParas();
+//                            
+//                            for (int j = 0; j < paras.length; j++) {
+//                                if (paras[j].isINT()) {
+//                                    ps[i].setInt(j + 1, paras[j].getIntValue());
+//                                }
+//                                if (paras[j].isSTR()) {
+//                                    ps[i].setString(j + 1, paras[j].getStrValue());
+//                                }
+//                                ps[i].execute();
+//                            }
+                            script.getPreparedCommand(i).execute();
                         }
-                        long endTime = System.currentTimeMillis();
                         connection.commit();
+                        long endTime = System.currentTimeMillis();
 
                         //将执行时间和结果保存在临时缓冲区里
                         rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
@@ -167,8 +167,12 @@ public class TransExecutor implements Runnable {
                                     break;
                                 }
                                 connection.setAutoCommit(false);
-                                for(int j = 0 ; j < ps.length; j++)
-                                    ps[j] = connection.prepareStatement(transaction.getScript().getPreparedCommand(j).getSql());
+//                                for(int j = 0 ; j < ps.length; j++)
+//                                    ps[j] = connection.prepareStatement(transaction.getScript().getPreparedCommand(j).getOriginalSql());
+                                for(int i = 0; i < script.length(); i++){
+                                    script.getPreparedCommand(i).setConnection(connection);
+                                    script.getPreparedCommand(i).prepare();
+                                }
                                 execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                                 continue;
                             }
@@ -221,7 +225,6 @@ public class TransExecutor implements Runnable {
                             e.printStackTrace();
                         }
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
-                        continue;
                     }
                 }
             }
@@ -233,18 +236,19 @@ public class TransExecutor implements Runnable {
                     try {
                         long beginTime = System.currentTimeMillis();
                         for (int i = 0; i < script.length(); i++) {
-                            PreparedSQLCommand command = script.getPreparedCommand(i);
-                            PreparedPara[] paras = command.getPreparedParas();
-
-                            for (int j = 0; j < paras.length; j++) {
-                                if (paras[j].isINT()) {
-                                    ps[i].setInt(j + 1, paras[j].getIntValue());
-                                }
-                                if (paras[j].isSTR()) {
-                                    ps[i].setString(j + 1, paras[j].getStrValue());
-                                }
-                                ps[i].execute();
-                            }
+//                            PreparedSQLCommand command = script.getPreparedCommand(i);
+//                            PreparedPara[] paras = command.getPreparedParas();
+//
+//                            for (int j = 0; j < paras.length; j++) {
+//                                if (paras[j].isINT()) {
+//                                    ps[i].setInt(j + 1, paras[j].getIntValue());
+//                                }
+//                                if (paras[j].isSTR()) {
+//                                    ps[i].setString(j + 1, paras[j].getStrValue());
+//                                }
+//                                ps[i].execute();
+//                            }
+                            script.getPreparedCommand(i).execute();
                         }
                         long endTime = System.currentTimeMillis();
 
@@ -261,8 +265,11 @@ public class TransExecutor implements Runnable {
                                     break;
                                 }
                                 connection.setAutoCommit(false);
-                                for(int j = 0 ; j < ps.length; j++)
-                                    ps[j] = connection.prepareStatement(transaction.getScript().getPreparedCommand(j).getSql());
+                                for(int i = 0; i < script.length(); i++){
+                                    script.getPreparedCommand(i).setConnection(connection);
+                                    script.getPreparedCommand(i).prepare();
+                                }
+                                
                                 execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                                 continue;
                             }

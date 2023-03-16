@@ -8,7 +8,7 @@ public class CONFIG {
 
     public static int DEFAULT_SIZE_PER_VAR = 100000000;//默认每个文件变量的最大使用容量
 
-    public static int DEFAULT_SIZE_SEND_BUFFER_PER_THREAD = 1000;//每个执行线程的发送缓冲区的大小
+    public static int DEFAULT_SIZE_SEND_BUFFER_PER_THREAD = 2000;//每个执行线程的发送缓冲区的大小
 
     public static Boolean TIMEOUT = false;//是否已经执行结束
 

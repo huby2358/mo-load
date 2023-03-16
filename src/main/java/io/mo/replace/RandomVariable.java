@@ -5,6 +5,8 @@ import io.mo.CONFIG;
 public class RandomVariable implements Variable {
     private String name;
     private int start;
+
+
     private int end;
     private int scope = CONFIG.PARA_SCOPE_TRANSCATION;
     
@@ -45,5 +47,14 @@ public class RandomVariable implements Variable {
     @Override
     public String getExpress() {
         return "{"+name+"}";
+    }
+
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
     }
 }

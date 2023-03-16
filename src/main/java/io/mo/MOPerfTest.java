@@ -64,7 +64,8 @@ public class MOPerfTest {
     public static void initTransaction() {
         int transCount = RunConfigUtil.getTransactionNum();
         if (0 == transCount) {
-            LOG.info("No transaction needs to be executed,the program will exit.");
+            LOG.error("No transaction needs to be executed,the program will exit.");
+            System.exit(1);
         }
 
         transactions = new Transaction[transCount];
@@ -169,6 +170,16 @@ public class MOPerfTest {
                         transBufferProducer.addBuffer(buffer);
                         //执行前，先初始化并填满每个线程的发送队列
                         buffer.fill();
+                    }else {
+                        PreparedSQLCommand[] commands = transactions[i].getScript().getPreparedCommands();
+                        for(int k = 0; k < commands.length; k++){
+                            commands[k].setConnection(connection);
+                            boolean pr = commands[k].prepare();
+                            
+                            //如果prepare失败，直接退出
+                            if(!pr)
+                                System.exit(1);
+                        }
                     }
 
                     executors[j] = new TransExecutor(j,connection,buffer,execResult[i],barrier);
