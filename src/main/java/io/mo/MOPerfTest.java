@@ -4,10 +4,7 @@ import io.mo.conn.ConnectionOperation;
 import io.mo.para.PreparedPara;
 import io.mo.replace.Variable;
 import io.mo.result.ExecResult;
-import io.mo.thread.PreparedParaProducer;
-import io.mo.thread.ResultProcessor;
-import io.mo.thread.TransBufferProducer;
-import io.mo.thread.TransExecutor;
+import io.mo.thread.*;
 import io.mo.transaction.PreparedSQLCommand;
 import io.mo.transaction.SQLScript;
 import io.mo.transaction.TransBuffer;
@@ -36,10 +33,7 @@ public class MOPerfTest {
 
     //初始化当前执行的结果文件目录
     public static void initDir(){
-        //File data_dirs = new File("report/data/");
         File error_dir = new File("report/" + CONFIG.EXECUTENAME + "/error/");
-//        if(!data_dirs.exists())
-//            data_dirs.mkdirs();
 
         if(!error_dir.exists())
             error_dir.mkdirs();
@@ -76,17 +70,6 @@ public class MOPerfTest {
 
         for (int i = 0; i < transCount; i++) {
             transactions[i] = RunConfigUtil.getTransaction(i);
-            //transactions[i].setPreparedParaProducer(preparedParaProducer);
-            if(transactions[i].isPrepared()){
-                SQLScript script = transactions[i].getScript();
-                PreparedSQLCommand[] commands = script.getPreparedCommands();
-                for(int j = 0; j < commands.length; j++){
-                    PreparedPara[] paras = commands[j].getPreparedParas();
-                    for( int k = 0; k < paras.length; k ++){
-                        preparedParaProducer.addPreparedPara(paras[k]);
-                    }
-                }
-            }
             execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length(),transactions[i].getTheadnum());
             resultProcessor.addResult(execResult[i]);
         }
@@ -138,9 +121,6 @@ public class MOPerfTest {
             LOG.info(String.format("transaction[%s].tnum = %d", transactions[i].getName(),t_num));
             TransExecutor[] executors = new TransExecutor[t_num];
 
-            //初始化线程组
-            //services[i] = Executors.newFixedThreadPool(t_num);
-
             //定义线程初始化计数器
             CyclicBarrier barrier = new CyclicBarrier(t_num, new Runnable() {
                 @Override
@@ -164,7 +144,8 @@ public class MOPerfTest {
 
                     //初始化发送缓冲区，每个executor拥有一个发送缓冲区
                     TransBuffer buffer = new TransBuffer(transactions[i]);
-
+                    executors[j] = new TransExecutor(j,connection,buffer,execResult[i],barrier);
+                    
                     if(!transactions[i].isPrepared()){
                         //将该加入到发送缓冲区生成器队列中，用于重新补充缓冲区中已经被发送过的事务
                         transBufferProducer.addBuffer(buffer);
@@ -173,16 +154,20 @@ public class MOPerfTest {
                     }else {
                         PreparedSQLCommand[] commands = transactions[i].getScript().getPreparedCommands();
                         for(int k = 0; k < commands.length; k++){
-                            commands[k].setConnection(connection);
-                            boolean pr = commands[k].prepare();
-                            
-                            //如果prepare失败，直接退出
-                            if(!pr)
+                            PreparedPara[] preparedParas = commands[k].newPreparedParas();
+                            for(int h = 0; h < preparedParas.length; h++){
+                                preparedParaProducer.addPreparedPara(preparedParas[h]);
+                            }
+
+                            PrepareStatmentExecutor prepareStatmentExecutor = new PrepareStatmentExecutor(connection,commands[k],preparedParas);
+                            if(!prepareStatmentExecutor.prepare()){
                                 System.exit(1);
+                            }
+
+                            executors[j].addPrepareStatmentExecutor(prepareStatmentExecutor);
                         }
                     }
 
-                    executors[j] = new TransExecutor(j,connection,buffer,execResult[i],barrier);
                     thread[j] = new Thread(executors[j]);
                     //services[i].execute(executors[j]);
                 } catch (Exception e) {

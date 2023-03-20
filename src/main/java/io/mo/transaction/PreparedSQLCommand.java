@@ -48,6 +48,7 @@ public class PreparedSQLCommand {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+        LOG.debug("Connection hash code : " + connection.toString());
     }
     
     public boolean prepare(){
@@ -94,9 +95,11 @@ public class PreparedSQLCommand {
             }
             ps[run_pos].execute();
         }
-        run_pos ++;
+        
         if(run_pos == ps.length -1)
             run_pos = 0;
+        else
+            run_pos ++;
     }
     
     public boolean containRandomVars(){
@@ -152,5 +155,36 @@ public class PreparedSQLCommand {
                 preparedParas[i] = para;
             }
         }
+    }
+    
+    public PreparedPara[] newPreparedParas(){
+        if(preparedParas.length == 0){
+            return new PreparedPara[0];
+        }
+
+        PreparedPara[] newPreparedParas = new PreparedPara[preparedParas.length];
+        for(int i = 0; i < newPreparedParas.length; i++ ){
+            if(preparedParas[i].getType().equalsIgnoreCase("INT")){
+                PreparedPara para = new PreparedPara("INT", preparedParas[i].getOrg_value());
+
+                newPreparedParas[i] = para;
+            }
+
+            if(preparedParas[i].getType().equalsIgnoreCase("STR")){
+                PreparedPara para = new PreparedPara("STR", preparedParas[i].getOrg_value());
+                newPreparedParas[i] = para;
+            }
+        }
+        
+        return newPreparedParas;
+    }
+
+
+    public RandomVariable getRandomVariable() {
+        return randomVariable;
+    }
+
+    public void setRandomVariable(RandomVariable randomVariable) {
+        this.randomVariable = randomVariable;
     }
 }
