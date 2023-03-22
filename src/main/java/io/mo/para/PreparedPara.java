@@ -36,12 +36,12 @@ public class PreparedPara {
         this.type = type;
         this.org_value = org_value;
         if(this.type.equalsIgnoreCase("INT")) {
-            for (int i = 0; i < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD; i++)
+            for (int i = 0; i < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD; i++)
                 int_values.add(Integer.parseInt(ReplaceConfigUtil.replace(org_value)));
         }
 
         if(this.type.equalsIgnoreCase("STR")) {
-            for (int i = 0; i < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD; i++)
+            for (int i = 0; i < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD; i++)
                 str_values.add(ReplaceConfigUtil.replace(org_value));
         }
 
@@ -61,15 +61,16 @@ public class PreparedPara {
     private class Producer extends Thread{
         public void run(){
             while(!CONFIG.TIMEOUT){
+                System.out.println("int_values.size() = " + int_values.size());
                 if(type.equalsIgnoreCase("INT")){
-                    if(int_values.size() < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD){
+                    if(int_values.size() < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD){
 
                         int_values.add(Integer.parseInt(ReplaceConfigUtil.replace(org_value)));
                     }
                 }
 
                 if(type.equalsIgnoreCase("STR")){
-                    if(str_values.size() < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD){
+                    if(str_values.size() < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD){
 
                         str_values.add(ReplaceConfigUtil.replace(org_value));
                     }

@@ -109,12 +109,12 @@ public class TransExecutor implements Runnable {
                     } catch (SQLException e) {
                         //LOG.error(e.getStackTrace());
                         try {
-                            if(connection == null || connection.isClosed()) {
+                            if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
                                     rtBuffer.setValid(false);
-                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit",id));
+                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times in 30s, and will exit",id));
                                     break;
                                 }
                                 statement = connection.createStatement();
@@ -154,12 +154,12 @@ public class TransExecutor implements Runnable {
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                         
                         try {
-                            if(connection == null || connection.isClosed()) {
+                            if(connection == null || connection.isClosed() || connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
                                     rtBuffer.setValid(false);
-                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit",id));
+                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times in 30s, and will exit",id));
                                     break;
                                 }
                                 connection.setAutoCommit(false);
@@ -176,7 +176,7 @@ public class TransExecutor implements Runnable {
                         } catch (SQLException e1) {
                             running = false;
                             rtBuffer.setValid(false);
-                            LOG.error(String.format("Thread[id=%d] will exit for unexpected exception: \n %s",id,e.getMessage()));
+                            LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times in 30s, and will exit",id));
                             break;
                         } 
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
@@ -204,7 +204,7 @@ public class TransExecutor implements Runnable {
 
                     } catch (SQLException e) {
                         try {
-                            if(connection == null || connection.isClosed()) {
+                            if(connection == null || connection.isClosed() || connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
@@ -242,7 +242,7 @@ public class TransExecutor implements Runnable {
                     }catch (SQLException e){
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                         try {
-                            if(connection == null || connection.isClosed()) {
+                            if(connection == null || connection.isClosed() || connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;

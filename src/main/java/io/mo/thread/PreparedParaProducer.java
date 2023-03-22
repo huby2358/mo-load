@@ -27,17 +27,21 @@ public class PreparedParaProducer extends Thread{
             for(int i = 0; i < buffers.size(); i++){
                 PreparedPara para = buffers.get(i);
                 //System.out.println("para.int_values = " +i+": "+ para.int_values.size());
-
+                //System.out.println("int_values.size() = " + para.int_values.size());
+                
                 if(para.getType().equalsIgnoreCase("INT")){
-                    if(para.int_values.size() < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD){
-                         para.int_values.add(Integer.parseInt(ReplaceConfigUtil.replace(para.getOrg_value())));
+                    int left = para.int_values.size();
+                    if(left < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD){
+                        for(int j = 0; j < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD - left; j++)
+                            para.int_values.add(Integer.parseInt(ReplaceConfigUtil.replace(para.getOrg_value())));
                     }
                 }
 
                 if(para.getType().equalsIgnoreCase("STR")){
-                    if(para.str_values.size() < CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD){
-
-                        para.str_values.add(ReplaceConfigUtil.replace(para.getOrg_value()));
+                    int left = para.str_values.size();
+                    if(para.str_values.size() < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD){
+                        for(int j = 0; j < CONFIG.DEFAULT_SIZE_PREPARED_PARA_PER_THREAD - left; j++)
+                            para.str_values.add(ReplaceConfigUtil.replace(para.getOrg_value()));
                     }
                 }
             }

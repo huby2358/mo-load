@@ -19,8 +19,8 @@ jdbc:
     failoverReadOnly: "false"
     serverTimezone: "Asia/Shanghai"
     socketTimeout: 10000
-    useSSL: "true"
-    enabledTLSProtocols : "TLSv1.2"
+    useSSL: "false"
+    #enabledTLSProtocols : "TLSv1.2"
 #users
 user:
   name: "dump"

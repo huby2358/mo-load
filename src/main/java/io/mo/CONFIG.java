@@ -10,6 +10,8 @@ public class CONFIG {
 
     public static int DEFAULT_SIZE_SEND_BUFFER_PER_THREAD = 2000;//每个执行线程的发送缓冲区的大小
 
+    public static int DEFAULT_SIZE_PREPARED_PARA_PER_THREAD = 100000;//每个执行线程的发送缓冲区的大小
+
     public static Boolean TIMEOUT = false;//是否已经执行结束
 
     public static int TEMP_RT_BUF_SIZE_PER_THREAD = 100000;
