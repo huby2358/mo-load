@@ -154,7 +154,7 @@ public class TransExecutor implements Runnable {
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                         
                         try {
-                            if(connection == null || connection.isClosed() || connection.isValid(1000)) {
+                            if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
@@ -204,7 +204,7 @@ public class TransExecutor implements Runnable {
 
                     } catch (SQLException e) {
                         try {
-                            if(connection == null || connection.isClosed() || connection.isValid(1000)) {
+                            if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
@@ -242,7 +242,7 @@ public class TransExecutor implements Runnable {
                     }catch (SQLException e){
                         execResult.setError(transName+":\r\n"+e.getMessage()+"\r\n");
                         try {
-                            if(connection == null || connection.isClosed() || connection.isValid(1000)) {
+                            if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;

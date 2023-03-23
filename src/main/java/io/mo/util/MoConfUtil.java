@@ -1,5 +1,7 @@
 package io.mo.util;
 
+import io.mo.CONFIG;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,14 +28,17 @@ public class MoConfUtil {
         StringBuilder URL = new StringBuilder("jdbc:mysql://");
         Map jdbc = (Map)conf.get("jdbc");
         List gates = (ArrayList)jdbc.get("server");
-
-        for(int i = 0; i < gates.size();i++){
-            Map gate = (Map)gates.get(i);
-            URL.append(gate.get("addr"));
-            if(i < gates.size() - 1)
-                URL.append(",");
-            else
-                URL.append("/");
+        if(CONFIG.SPEC_SERVER_ADDR == null) {
+            for (int i = 0; i < gates.size(); i++) {
+                Map gate = (Map) gates.get(i);
+                URL.append(gate.get("addr"));
+                if (i < gates.size() - 1)
+                    URL.append(",");
+                else
+                    URL.append("/");
+            }
+        } else {
+            URL.append(CONFIG.SPEC_SERVER_ADDR+":"+CONFIG.SPEC_SERVER_PORT+"/");
         }
 
         URL.append(getDefaultDatabase()).append("?");
@@ -71,6 +76,10 @@ public class MoConfUtil {
     }
 
     public static String getDefaultDatabase(){
+        
+        if(CONFIG.SPEC_DATABASE != null)
+            return CONFIG.SPEC_DATABASE;
+        
         if(conf == null) init();
 
         Map jdbc = (Map)conf.get("jdbc");

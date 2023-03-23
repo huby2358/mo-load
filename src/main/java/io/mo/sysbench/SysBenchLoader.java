@@ -1,6 +1,5 @@
-package io.mo.thread;
+package io.mo.sysbench;
 
-import io.mo.Sysbench;
 import io.mo.util.SysbenchConfUtil;
 import org.apache.log4j.Logger;
 
@@ -42,8 +41,8 @@ public class SysBenchLoader implements Runnable{
             "PRIMARY KEY (`id`)\n" +
             ")";
     
-    private String insert_dml = "INSERT INTO `%s` VALUES(%d,%d,'%s','%s')";
-    private String insert_auto_dml = "INSERT INTO `%s`(`k`,`c`,`pad`) VALUES(%d,'%s','%s')";
+    //private StringBuffer insert_dml = new StringBuffer("INSERT INTO `%s` VALUES(%d, %d, '%s','%s')");
+    //private StringBuffer insert_auto_dml = new StringBuffer("INSERT INTO `%s`(`k`,`c`,`pad`) VALUES(%d,'%s','%s')");
 
 
     private static Logger LOG = Logger.getLogger(SysBenchLoader.class.getName());
@@ -70,31 +69,60 @@ public class SysBenchLoader implements Runnable{
             if (auto_incr) {
                 //create table
                 stmt.execute(tbl_create_auto_ddl.replace("tablename", tbl_name));
+                StringBuffer insert_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
                 //batch insert
                 long start = System.currentTimeMillis();
-                con.setAutoCommit(false);
+                //con.setAutoCommit(false);
                 for (int j = 1; j < size + 1; j++) {
-                    String sql = String.format(insert_auto_dml,tbl_name,getRandom4Number(),getRandomChar(120),getRandomChar(60));
-                    stmt.execute(sql);
-                    if(size > batch_size && j % batch_size == 0)
-                        con.commit();
+                    //String sql = String.format(insert_auto_dml,tbl_name,getRandom4Number(),getRandomChar(120),getRandomChar(60));
+                    
+                    insert_dml.append("(");
+                    insert_dml.append(getRandom4Number());
+                    insert_dml.append(",");
+                    insert_dml.append(getRandomChar(120));
+                    insert_dml.append(",");
+                    insert_dml.append(getRandomChar(60));
+                    insert_dml.append(")");
+                    //stmt.execute(sql);
+                    if(j % batch_size == 0 || j == size ) {
+                        insert_dml.append(";");
+                        stmt.execute(insert_dml.toString());
+                        //System.out.println(insert_dml.toString());
+                        insert_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
+                    }  else
+                        insert_dml.append(",");
                 }
-                con.commit();
+                //con.commit();
                 long end = System.currentTimeMillis();
                 LOG.info(String.format("Table %s has been initialized completely, and cost:%s s", tbl_name, (end - start) / 1000));
             } else {
                 //create table
                 stmt.execute(tbl_create_ddl.replace("tablename", tbl_name));
                 //batch insert
-                con.setAutoCommit(false);
+                //con.setAutoCommit(false);
+                StringBuffer insert_auto_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
                 long start = System.currentTimeMillis();
                 for (int j = 1; j < size + 1; j++) {
-                    String sql = String.format(insert_dml,tbl_name,j,getRandom4Number(),getRandomChar(120),getRandomChar(60));
-                    stmt.execute(sql);
-                    if(size > batch_size && j % batch_size == 0)
-                        con.commit();
+                    
+                    insert_auto_dml.append("(");
+                    insert_auto_dml.append(j);
+                    insert_auto_dml.append(",");
+                    insert_auto_dml.append(getRandom4Number());
+                    insert_auto_dml.append(",");
+                    insert_auto_dml.append(getRandomChar(120));
+                    insert_auto_dml.append(",");
+                    insert_auto_dml.append(getRandomChar(60));
+                    insert_auto_dml.append(")");
+                    //stmt.execute(sql);
+                    if(j % batch_size == 0 || j == size ) {
+                        insert_auto_dml.append(";");
+                        //System.out.println(insert_auto_dml.toString());
+                        stmt.execute(insert_auto_dml.toString());
+                        insert_auto_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
+                    }  else
+                        insert_auto_dml.append(",");
                 }
-                con.commit();
+                //con.commit();
                 long end = System.currentTimeMillis();
                 LOG.info(String.format("Table %s has been initialized completely, and cost:%s s", tbl_name, (end - start) / 1000));
             }

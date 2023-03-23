@@ -11,6 +11,7 @@ import io.mo.transaction.TransBuffer;
 import io.mo.transaction.Transaction;
 import io.mo.util.ReplaceConfigUtil;
 import io.mo.util.RunConfigUtil;
+import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -30,50 +31,6 @@ public class MOPerfTest {
     //private static ExecutorService[] services;
 
     private static Logger LOG = Logger.getLogger(MOPerfTest.class.getName());
-
-    //初始化当前执行的结果文件目录
-    public static void initDir(){
-        File error_dir = new File("report/" + CONFIG.EXECUTENAME + "/error/");
-
-        if(!error_dir.exists())
-            error_dir.mkdirs();
-    }
-
-    //初始化变量
-    public static void initVar(){
-        LOG.info("Initializing the variables,please wait for serval minutes.");
-        if(0 == ReplaceConfigUtil.vars.size()){
-            LOG.info("No variable item,skip initializing the variables");
-            return;
-        }
-
-        for(int i = 0; i < ReplaceConfigUtil.vars.size(); i++){
-            Variable var = (Variable) ReplaceConfigUtil.vars.get(i);
-            var.init();
-        }
-        LOG.info("The variables has been prepared!");
-    }
-
-    //初始化事务先关实例
-    public static void initTransaction() {
-        int transCount = RunConfigUtil.getTransactionNum();
-        if (0 == transCount) {
-            LOG.error("No transaction needs to be executed,the program will exit.");
-            System.exit(1);
-        }
-
-        transactions = new Transaction[transCount];
-        execResult = new ExecResult[transCount];
-        
-        //定义线程池
-        //services = new ExecutorService[transCount];
-
-        for (int i = 0; i < transCount; i++) {
-            transactions[i] = RunConfigUtil.getTransaction(i);
-            execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length(),transactions[i].getTheadnum());
-            resultProcessor.addResult(execResult[i]);
-        }
-    }
     
     public static void main(String[] args) throws InterruptedException {
         ShutDownHookThread hookThread = new ShutDownHookThread();
@@ -82,20 +39,52 @@ public class MOPerfTest {
         long excuteTime = RunConfigUtil.getExecDuration()*60*1000;
         int t_num = 0;
 
-        if(args.length == 1){
-            if(args[0] != null && !"0".equalsIgnoreCase(args[0])){
-                excuteTime = Integer.parseInt(args[0])*60*1000;
-            }
-        }
+        Options options = new Options();
+        options.addOption("h",true,"The server or proxy address");
+        options.addOption("P",true,"The server or proxy port");
+        options.addOption("u",true,"The username of conneciton to server");
+        options.addOption("p",true,"The password of connection user to server");
+        options.addOption("t",true,"The thread number per transaction");
+        options.addOption("d",true,"The duration that all transactions will run");
+        options.addOption("b","db",true,"The duration that all transactions will run");
 
-        if(args.length == 2){
-            if(args[0] != null && !"0".equalsIgnoreCase(args[0])){
-                excuteTime = Integer.parseInt(args[0])*60*1000;
+        CommandLineParser parser = new DefaultParser();
+        try {
+            CommandLine cmd = parser.parse(options,args);
+            
+            if(cmd.hasOption("h")) {
+                CONFIG.SPEC_SERVER_ADDR = cmd.getOptionValue('h');
+                LOG.info("server addr = " + cmd.getOptionValue('h'));
             }
+            
+            if(cmd.hasOption("P")) {
+                CONFIG.SPEC_SERVER_PORT = Integer.parseInt(cmd.getOptionValue('P'));
+                LOG.info("server port = " + cmd.getOptionValue('P'));
+            }
+            
+            if(cmd.hasOption("u")) {
+                CONFIG.SPEC_USERNAME = cmd.getOptionValue('u');
+                LOG.info("username = " + cmd.getOptionValue('u'));
+            }
+            
+            if(cmd.hasOption("p")) {
+                CONFIG.SPEC_PASSWORD = cmd.getOptionValue('p');
+                LOG.info("password = " + cmd.getOptionValue('p'));
+            }
+            
+            if(cmd.hasOption("b")) {
+                CONFIG.SPEC_DATABASE = cmd.getOptionValue("b");
+                LOG.info("database = " + cmd.getOptionValue("b"));
+            }
+            
+            if(cmd.hasOption("d"))
+                excuteTime = Integer.parseInt(cmd.getOptionValue('d'))*60*1000;
 
-            if(args[1] != null){
-                t_num = Integer.parseInt(args[1]);
-            }
+            if(cmd.hasOption("t"))
+                t_num = Integer.parseInt(cmd.getOptionValue('t'));
+            
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
         
         LOG.info(String.format("The test will last for %d minutes.",excuteTime/1000/60));
@@ -219,6 +208,50 @@ public class MOPerfTest {
         /*for (ExecutorService service:services) {
             service.shutdown();
         }*/
+    }
+
+    //初始化当前执行的结果文件目录
+    public static void initDir(){
+        File error_dir = new File("report/" + CONFIG.EXECUTENAME + "/error/");
+
+        if(!error_dir.exists())
+            error_dir.mkdirs();
+    }
+
+    //初始化变量
+    public static void initVar(){
+        LOG.info("Initializing the variables,please wait for serval minutes.");
+        if(0 == ReplaceConfigUtil.vars.size()){
+            LOG.info("No variable item,skip initializing the variables");
+            return;
+        }
+
+        for(int i = 0; i < ReplaceConfigUtil.vars.size(); i++){
+            Variable var = (Variable) ReplaceConfigUtil.vars.get(i);
+            var.init();
+        }
+        LOG.info("The variables has been prepared!");
+    }
+
+    //初始化事务先关实例
+    public static void initTransaction() {
+        int transCount = RunConfigUtil.getTransactionNum();
+        if (0 == transCount) {
+            LOG.error("No transaction needs to be executed,the program will exit.");
+            System.exit(1);
+        }
+
+        transactions = new Transaction[transCount];
+        execResult = new ExecResult[transCount];
+
+        //定义线程池
+        //services = new ExecutorService[transCount];
+
+        for (int i = 0; i < transCount; i++) {
+            transactions[i] = RunConfigUtil.getTransaction(i);
+            execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length(),transactions[i].getTheadnum());
+            resultProcessor.addResult(execResult[i]);
+        }
     }
 
     static class ShutDownHookThread extends Thread{

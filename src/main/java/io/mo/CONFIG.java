@@ -29,5 +29,9 @@ public class CONFIG {
     public static int PARA_SCOPE_TRANSCATION = 0;//变量的作用域为事务
     public static int PARA_SCOPE_STATEMENT = 1;//变量的作用域为SQL
 
-
+    public static String SPEC_SERVER_ADDR = null;
+    public static int SPEC_SERVER_PORT = 6001;
+    public static String SPEC_USERNAME = null;
+    public static String SPEC_PASSWORD = null;
+    public static String SPEC_DATABASE = null;
 }

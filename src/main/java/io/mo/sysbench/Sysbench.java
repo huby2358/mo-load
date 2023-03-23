@@ -1,12 +1,12 @@
-package io.mo;
+package io.mo.sysbench;
 
+import io.mo.CONFIG;
 import io.mo.conn.ConnectionOperation;
-import io.mo.thread.SysBenchLoader;
 import io.mo.util.SysbenchConfUtil;
+import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Random;
 import java.util.UUID;
@@ -28,29 +28,67 @@ public class Sysbench {
 
     private static Logger LOG = Logger.getLogger(Sysbench.class.getName());
     
+    public Sysbench(){
+        
+    }
+    
     public static void main(String[] args){
-        if(args.length == 1){
-            if(args[0] != null){
-                tbl_conut = Integer.parseInt(args[0]);
-            }
-        }
 
-        if(args.length == 2){
-            if(args[0] != null){
-                tbl_conut = Integer.parseInt(args[0]);
+        Options options = new Options();
+        options.addOption("h",true,"The server or proxy address");
+        options.addOption("P",true,"The server or proxy port");
+        options.addOption("u",true,"The username of conneciton to server");
+        options.addOption("p",true,"The password of connection user to server");
+        options.addOption("t",true,"The thread number per transaction");
+        options.addOption("d",true,"The duration that all transactions will run");
+        options.addOption("b","db",true,"The duration that all transactions will run");
+        options.addOption("n",true,"For sysbench data prepare, set table count, must designate method to SYSBENCH ");
+        options.addOption("s",true,"for sysbench data prepare, set table size, must designate method to SYSBENCH");
+
+        CommandLineParser parser = new DefaultParser();
+        try {
+
+            CommandLine cmd = parser.parse(options,args);
+
+            if(cmd.hasOption("h")) {
+                CONFIG.SPEC_SERVER_ADDR = cmd.getOptionValue('h');
+                LOG.info("server addr = " + cmd.getOptionValue('h'));
             }
 
-            if(args[1] != null){
-                tbl_size = Integer.parseInt(args[1]);
+            if(cmd.hasOption("P")) {
+                CONFIG.SPEC_SERVER_PORT = Integer.parseInt(cmd.getOptionValue('P'));
+                LOG.info("server port = " + cmd.getOptionValue('P'));
             }
+
+            if(cmd.hasOption("u")) {
+                CONFIG.SPEC_USERNAME = cmd.getOptionValue('u');
+                LOG.info("username = " + cmd.getOptionValue('u'));
+            }
+
+            if(cmd.hasOption("p")) {
+                CONFIG.SPEC_PASSWORD = cmd.getOptionValue('p');
+                LOG.info("password = " + cmd.getOptionValue('p'));
+            }
+
+            if(cmd.hasOption("b")) {
+                CONFIG.SPEC_DATABASE = cmd.getOptionValue("b");
+                LOG.info("database = " + cmd.getOptionValue("b"));
+            }
+
+            if(cmd.hasOption("n"))
+                tbl_conut = Integer.parseInt(cmd.getOptionValue('n'));
+
+            if(cmd.hasOption("s"))
+                tbl_size = Integer.parseInt(cmd.getOptionValue('s'));
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
         
         String db_drop_ddl = "DROP DATABASE IF EXISTS `" + db_name +"`";
 
         String db_create_ddl = "CREATE DATABASE IF NOT EXISTS `" + db_name +"`";
         
-        
-
         String insert_dml = "INSERT INTO `tablename` VALUES(?,?,?,?)";
         String insert_auto_dml = "INSERT INTO `tablename`(`k`,`c`,`pad`) VALUES(?,?,?)";
 

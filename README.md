@@ -150,6 +150,11 @@ And you can also specify some parameters when executing the command `./start.sh`
 | -t         |concurrency that test will run in|
 | -m         |method that the test will run with, must be SYSBENCH or None|
 | -d         |time that test will last, unit minute|
+| -h         |server address|
+| -P         |server port|
+| -u         |user name for connection|
+| -p         |password of user for connection|
+| -b         |database for connection|
 
 ## 4. Check the report
 

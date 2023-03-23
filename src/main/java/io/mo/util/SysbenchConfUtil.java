@@ -1,11 +1,8 @@
 package io.mo.util;
 
-import io.mo.Sysbench;
+import io.mo.sysbench.Sysbench;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class SysbenchConfUtil {

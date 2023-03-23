@@ -1,5 +1,6 @@
 package io.mo.conn;
 
+import io.mo.CONFIG;
 import io.mo.util.MoConfUtil;
 
 import java.sql.Connection;
@@ -15,6 +16,12 @@ public class MOConnection implements DatabaseConnection {
 
     @Override
     public Connection BuildDatabaseConnection() {
+        conn = MoConfUtil.getURL();
+        if(CONFIG.SPEC_USERNAME != null)
+            username = CONFIG.SPEC_USERNAME;
+
+        if(CONFIG.SPEC_PASSWORD != null)
+            password = CONFIG.SPEC_PASSWORD;
 
         for(int i = 0; i < 3; i++) {
             try {
