@@ -6,7 +6,7 @@ transaction:
   - name: "simple_insert_10_100000000"  #transaction名称
     vuser: 10   #执行该transaction测试的并发量
     mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
-    prepared: "false"   #是否需要对script的sql进行prepare，如果为true，要求script中只能有一个sql，否则该参数失效
+    prepared: "false"   #是否需要对script的sql进行prepare
     #transaction的sql语句,可多条
     script:
       - sql: "insert into sbtest{tbx} values({i_id},{kvalue},'83868641912-28773972837-60736120486-75162659906-27563526494-20381887404-41576422241-93426793964-56405065102-33518432330','67847967377-48000963322-62604785301-91415491898-96926520291');"

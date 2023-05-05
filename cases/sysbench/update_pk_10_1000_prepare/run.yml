@@ -1,13 +1,13 @@
 #stdout=console, 过程数据输出到控制台和文件
-#stdout=file, 过程文件仅输出到文件
-stdout: "file"
 duration: 10 #所有transaction的执行时间，单位分钟
 transaction:
 - name: "update_pk_10_1000_prepare"  #transaction名称
   vuser: 50   #执行该transaction测试的并发量
   mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
-  prepared: "true"   #是否需要对script的sql进行prepare，如果为true，要求script中只能有一个sql，否则该参数失效
+  prepared: "true"   #是否需要对script的sql进行prepare
+  accept: 20619 #可接受的ERROR CODE，多个用,隔开，如果在事务运行过程中，出现该ERROR，将不被视为错误，可不设置
+  sucrate: 1   #成功率，即如果成功率达不到该值，该事务测试失败，默认为1
   #transaction的sql语句,可多条
   script:
-    - sql: "UPDATE sbtest{tbx} SET k=k+100 WHERE id = {id};"
+    - sql: "UPDATE sbtest{tbx} SET k=k+100 where id = ?;"
       paras: INT({id})
