@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,26 @@ public class RunConfigUtil {
                     if(prepared.equalsIgnoreCase("true"))
                         trans.setPrepared(true);
                     LOG.info("transaction["+trans.getName()+"].prepared = "+prepared);
+                }
+                
+                if(null != transM.get("sucrate")){
+                    Object sucrate = transM.get("sucrate");
+                    if (sucrate instanceof Integer)
+                        trans.setSucrate(((Integer) sucrate).doubleValue());
+                    if (sucrate instanceof String)
+                        trans.setSucrate(Double.valueOf((String) sucrate));
+
+                    if (sucrate instanceof Double)
+                        trans.setSucrate((Double) sucrate);
+                    LOG.info("transaction["+trans.getName()+"].sucrate = "+sucrate);
+                }
+
+                if(null != transM.get("accept")){
+                    String acceptErrorcodes  = String.valueOf(transM.get("accept"));
+                    String[] acceptErrorcodeArray = acceptErrorcodes.split(",");
+                    for (String errorCode: acceptErrorcodeArray)
+                        trans.addAcceptErrorCodes(Integer.valueOf(errorCode));
+                    LOG.info("transaction["+trans.getName()+"].accept = " + Arrays.toString(acceptErrorcodeArray));
                 }
 
 //                if(null != transM.get("paras")){

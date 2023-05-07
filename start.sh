@@ -4,7 +4,7 @@ WORKSPACE=$(cd `dirname $0`; pwd)
 LIB_WORKSPACE=$WORKSPACE/lib
 CONFPATH=.
 
-while getopts ":c:n:m:t:d:s:h:p:u:P:b:H" opt
+while getopts ":c:n:m:t:d:s:h:p:u:P:b:gH" opt
 do
     case $opt in
         c)
@@ -70,6 +70,9 @@ do
         b)
         DATABASE="--db=${OPTARG}"
         ;;
+        g)
+        SHUTDOWN="--shutdown"
+        ;;
         H)
         echo -e "Usage:　bash run.sh [option] [param] ...\nExcute mo oltp load task"
         echo -e "   -c  set config path, mo-load will use run.yml, replace.yml from this path"
@@ -83,6 +86,7 @@ do
         echo -e "   -u  user name for connection"
         echo -e "   -p  password of user for connection"
         echo -e "   -b  database for connection"
+        echo -e "   -g  shut down tracing real progress data by system-out"
         echo "For more support,please email to sudong@matrixorigin.io"
         exit 1
         ;;
@@ -102,7 +106,7 @@ done
 java -Xms1024M -Xmx30720M -cp ${libJars} \
         -Drun.yml=${CONFPATH}/run.yml \
         -Dreplace.yml=${CONFPATH}/replace.yml \
-        io.mo.MOPerfTest ${DURATION} ${THREAD} ${SERVER_ADDR} ${SERVER_PORT} ${USER} ${PASSWORD} ${THREAD} ${DURATION} ${DATABASE}
+        io.mo.MOPerfTest ${DURATION} ${THREAD} ${SERVER_ADDR} ${SERVER_PORT} ${USER} ${PASSWORD} ${THREAD} ${DURATION} ${DATABASE} ${SHUTDOWN}
 }
 
 function prepare {

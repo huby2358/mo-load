@@ -5,10 +5,16 @@ import io.mo.CONFIG;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.google.common.math.Quantiles;
+import org.checkerframework.checker.units.qual.A;
 
 public class ExecResult {
     private String name;
@@ -16,6 +22,19 @@ public class ExecResult {
     private long max_rt = -1;
     private long avg_rt = 0;
     private long min_rt = -1;
+    
+    private double rt_25th = -1;
+
+    private double rt_75th = -1;
+    private double rt_90th = -1;
+
+    private double rt_99th = -1;
+    
+    private double expRate = 1;
+    
+    private ArrayList<Long> rtValues = new ArrayList<>(10000000);
+    
+    private ReentrantLock lock = new ReentrantLock();
 
 
     private long totalTime = 0;
@@ -39,6 +58,21 @@ public class ExecResult {
     public String startTime = null;
     public String endTime = null;
     public int vuser = 0;
+
+
+    private int threadnum = 0;
+
+
+    private List<ErrorMessage> errors = new ArrayList<>(CONFIG.TEMP_ERROR_BUF_SIZE);
+
+
+    private  FileWriter error_writer ;
+
+
+    private boolean terminated = false;
+    
+    private volatile double counter = 0;
+    private volatile int index = 0;
     
 
     public int getThreadnum() {
@@ -53,16 +87,6 @@ public class ExecResult {
         this.threadnum--;
     }
 
-    private int threadnum = 0;
-
-
-    private List<String> errors = new ArrayList<String>(CONFIG.TEMP_ERROR_BUF_SIZE);
-
-
-    private  FileWriter error_writer ;
-
-
-    private boolean terminated = false;
 
     public ExecResult(String name){
         this.name = name;
@@ -103,27 +127,63 @@ public class ExecResult {
         setTime(start,end);
     }
 
-    public synchronized void setTime(long start,long end){
-        long time = end - start;
+    
+    public  void setTime(long start,long end){
+        try{
+            lock.lockInterruptibly();
+            long time = end - start;
+            if(rtValues.size() < 10000000)
+                rtValues.add(time);
+            else {
+                if (counter%10000000 == 10){
+                    rtValues.set(index,time);
+                }
+            }
 
-        if(max_rt < 0)  max_rt = time;
-        if(min_rt < 0)  min_rt = time;
+            counter++;
+            if(index < rtValues.size())
+                index++;
+            else 
+                index = 0;
 
-        if(this.start  == 0) this.start  = start;
-        
-        if(this.end == 0)  this.end = end;
+            if(max_rt < 0)  max_rt = time;
+            if(min_rt < 0)  min_rt = time;
 
-        if(max_rt < time)  max_rt = time;
+            if(this.start  == 0) this.start  = start;
 
-        if(min_rt > time)  min_rt = time;
+            if(this.end == 0)  this.end = end;
 
+            if(max_rt < time)  max_rt = time;
 
-        if(this.start > start)  this.start = start;
+            if(min_rt > time)  min_rt = time;
 
-        if(this.end < end) this.end = end;
+            if(this.start > start)  this.start = start;
 
-        totalTime += time;
-        totalCount++;
+            if(this.end < end) this.end = end;
+
+            totalTime += time;
+            totalCount++;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }finally {
+            if(lock.isHeldByCurrentThread()){
+                lock.unlock();
+            }
+        }
+    }
+    
+     
+    
+    public void computePercentile(){
+        Map<Integer,Double> percentile = Quantiles.percentiles().indexes(25,75,90,99).compute(rtValues);
+        rt_25th = percentile.get(25);
+        rt_75th = percentile.get(75);
+        rt_90th = percentile.get(90);
+        rt_99th = percentile.get(99);
+    }
+    
+    public Map<Integer,Double> getPercentileMap(){
+        return Quantiles.percentiles().indexes(20,75,90,99).compute(rtValues);
     }
 
     public void setName(String name) {
@@ -141,8 +201,23 @@ public class ExecResult {
     public void setAvg_rt(int avg_rt) {
         this.avg_rt = avg_rt;
     }
+    
+    public double getP25_rt(){
+        return rt_25th;
+    }
 
+    public double getP75_rt(){
+        return rt_75th;
+    }
 
+    public double getP90_rt(){
+        return rt_90th;
+    }
+
+    public double getP99_rt(){
+        return rt_99th;
+    }
+    
     public String getName() {
         return name;
     }
@@ -155,13 +230,13 @@ public class ExecResult {
         return max_rt;
     }
 
-    public String getAvg_rt() {
+    public float getAvg_rt() {
 
         //如果totalCount，说明还没有任何数据，直接返回null
         if(totalCount <= 0 )
-            return null;
+            return 0;
         avg_rt = totalTime /totalCount;
-        return String.format("%.2f",(float) totalTime /(float)totalCount);
+        return (float) totalTime /(float)totalCount;
     }
 
     public int getQueryCount() {
@@ -196,12 +271,13 @@ public class ExecResult {
         this.errorCount = count;
     }
 
-    public synchronized void setError(String error){
-        this.errors.add(error);
-        this.errorCount++;
+    public synchronized void setError(ErrorMessage errorMessage, boolean expected){
+        this.errors.add(errorMessage);
+        if(!expected)
+            this.errorCount++;
     }
 
-    public List<String> getErrors(){
+    public List<ErrorMessage> getErrors(){
         return errors;
     }
 
@@ -287,5 +363,39 @@ public class ExecResult {
 
     public void setVuser(int vuser) {
         this.vuser = vuser;
+    }
+    
+    public double getSucRate(){
+        BigDecimal brate = new BigDecimal((double)this.totalCount/(double)(this.totalCount + this.errorCount));
+        return brate.setScale(5,BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+    
+    public double getExpRate() {
+        return expRate;
+    }
+
+    public void setExpRate(double expRate) {
+        this.expRate = expRate;
+    }
+
+    public static void main(String[] args){
+        long beginTime = System.currentTimeMillis();
+        ArrayList<Double> rtValues = new ArrayList<>(100000000);
+        for(int i = 0; i < 100000000;i++){
+            rtValues.add(Math.random()*100000);
+        }
+        long endTime = System.currentTimeMillis();
+        
+        System.out.println("gen data: " + (endTime - beginTime));
+
+        beginTime = System.currentTimeMillis();
+        Map<Integer,Double> percentile = Quantiles.percentiles().indexes(20,75,90,99).compute(rtValues);
+        endTime = System.currentTimeMillis();
+        System.out.println("compute data: " + (endTime - beginTime));
+        
+        System.out.println("rt_25th = " + percentile.get(20));
+        System.out.println("rt_75th = " + percentile.get(75));
+        System.out.println("rt_90th = " + percentile.get(90));
+        System.out.println("rt_99th = " + percentile.get(99));
     }
 }

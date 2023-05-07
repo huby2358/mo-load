@@ -103,5 +103,11 @@
       <artifactId>javafaker</artifactId>
       <version>0.17.2</version>
     </dependency>
+    <dependency>
+      <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>31.1-jre</version>
+    </dependency>
   </dependencies>
 </project>

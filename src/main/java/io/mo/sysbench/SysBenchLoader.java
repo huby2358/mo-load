@@ -69,7 +69,7 @@ public class SysBenchLoader implements Runnable{
             if (auto_incr) {
                 //create table
                 stmt.execute(tbl_create_auto_ddl.replace("tablename", tbl_name));
-                StringBuffer insert_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
+                StringBuffer insert_dml = new StringBuffer("INSERT INTO " + tbl_name +"(k,c,pad) VALUES");
                 //batch insert
                 long start = System.currentTimeMillis();
                 //con.setAutoCommit(false);
@@ -88,7 +88,7 @@ public class SysBenchLoader implements Runnable{
                         insert_dml.append(";");
                         stmt.execute(insert_dml.toString());
                         //System.out.println(insert_dml.toString());
-                        insert_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
+                        insert_dml = new StringBuffer("INSERT INTO " + tbl_name +"(k,c,pad) VALUES");
                     }  else
                         insert_dml.append(",");
                 }

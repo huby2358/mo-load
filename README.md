@@ -80,11 +80,6 @@ Users can reference variables in transaction definitions to make transaction def
   #If it is true, there must be only one sql in the script, otherwise this parameter will become invalid
   prepared: "false"
   
-  #It is valid only when prepared=true. 
-  #The format is INT (value), STR (value). Value can be a variable or constant. 
-  #The count of parameters must be the same as the count of parameters in the preparedstatement statement
-  paras: INT({sequence}),STR({string})
-  
   #SQL statements of transaction, which can be multiple
   #Among them, the content enclosed by {} is the referenced variable, which will be replaced with the value of the specific variable during execution
   script:
@@ -164,13 +159,21 @@ And you can also specify some parameters when executing the command `./start.sh`
 * An example of *summary.txt* file looks like this:
 
 ```
-[simple_in]
-RT_MAX : 566
-RT_MIN : 9
-RT_AVG : 59.79
-TPS : 83
-SUCCESS : 5023
+[point_select]
+START : 2023-04-26 00:15:07
+END : 2023-04-26 00:15:53
+VUSER : 10
+TPS : 528
+QPS : 528
+SUCCESS : 22771
 ERROR : 0
+RT_MAX : 175
+RT_MIN : 2
+RT_AVG : 18.88
+RT_25TH : 9.0
+RT_75TH : 24.0
+RT_90TH : 35.0
+RT_99TH : 74.0
 
 ```
 * An example of *result.txt* file looks like this:

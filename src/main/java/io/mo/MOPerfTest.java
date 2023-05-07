@@ -29,6 +29,7 @@ public class MOPerfTest {
     private static PreparedParaProducer preparedParaProducer = new PreparedParaProducer();
 
     //private static ExecutorService[] services;
+    private static boolean exit_normally = false;
 
     private static Logger LOG = Logger.getLogger(MOPerfTest.class.getName());
     
@@ -47,7 +48,8 @@ public class MOPerfTest {
         options.addOption("t",true,"The thread number per transaction");
         options.addOption("d",true,"The duration that all transactions will run");
         options.addOption("b","db",true,"The duration that all transactions will run");
-
+        options.addOption("g","shutdown",false,"shut down tracing real progress data by system-out");
+        
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine cmd = parser.parse(options,args);
@@ -82,6 +84,9 @@ public class MOPerfTest {
 
             if(cmd.hasOption("t"))
                 t_num = Integer.parseInt(cmd.getOptionValue('t'));
+
+            if(cmd.hasOption("shutdown"))
+                CONFIG.SHUTDOWN_SYSTEMOUT = true;
             
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -203,8 +208,18 @@ public class MOPerfTest {
 
         Thread.sleep(3000);
 
-        LOG.info(" write total time = "+transBufferProducer.getWrite_total()+",read total time = "+transBufferProducer.getRead_total());
+        LOG.info("write total time = "+transBufferProducer.getWrite_total()+",read total time = "+transBufferProducer.getRead_total());
+        resultProcessor.join();
+        
+        if(resultProcessor.getTestResult()) {
+            LOG.info("This test has been executed successfully, and can get detailed result data in ./report/");
+        }
+        else {
+            LOG.error("This test has been executed failed, please check detailed result data in ./report/");
+            System.exit(1);
+        }
 
+        exit_normally = true;
         /*for (ExecutorService service:services) {
             service.shutdown();
         }*/
@@ -267,18 +282,26 @@ public class MOPerfTest {
             try {
                 Thread.sleep(1000);
                 for(int i = 0; i < conns.size();i++){
-                    if(!conns.get(i).getAutoCommit()){
-                        conns.get(i).rollback();
+                    if(!(conns.get(i) == null || conns.get(i).isClosed() || !conns.get(i).isValid(1000))) {
+                        if (!conns.get(i).getAutoCommit()) {
+                            conns.get(i).rollback();
+                        }
+                        conns.get(i).close();
                     }
-                    conns.get(i).close();
                 }
-                resultProcessor.join();
-                LOG.info("Program exit completely.");
+                if(!exit_normally)
+                    resultProcessor.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (SQLException e) {
-                //e.printStackTrace();
-                LOG.info("Program exit completely.");
+                e.printStackTrace();
+            }finally {
+                if(resultProcessor.getTestResult()) {
+                    LOG.info("This test has been executed successfully, and can get detailed result data in ./report/");
+                }
+                else {
+                    LOG.error("This test has been executed failed, please check detailed result data in ./report/");
+                }
             }
         }
     }

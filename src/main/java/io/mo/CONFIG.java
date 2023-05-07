@@ -34,4 +34,6 @@ public class CONFIG {
     public static String SPEC_USERNAME = null;
     public static String SPEC_PASSWORD = null;
     public static String SPEC_DATABASE = null;
+    
+    public static boolean SHUTDOWN_SYSTEMOUT = false;
 }

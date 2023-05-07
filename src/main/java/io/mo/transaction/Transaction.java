@@ -3,6 +3,8 @@ package io.mo.transaction;
 import io.mo.para.PreparedPara;
 import io.mo.thread.PreparedParaProducer;
 
+import java.util.ArrayList;
+
 public class Transaction {
     private String name;
     private int theadnum;
@@ -10,6 +12,12 @@ public class Transaction {
     private int mode = 0;
 
     private boolean prepared = false;
+
+    
+
+    private double sucrate = 1.0;
+
+    private ArrayList<Integer> acceptErrorCodes = new ArrayList<>();
 
     private PreparedPara[] paras;
 
@@ -133,6 +141,31 @@ public class Transaction {
 
     public void setPreparedParaProducer(PreparedParaProducer preparedParaProducer) {
         this.preparedParaProducer = preparedParaProducer;
+    }
+
+    public double getSucrate() {
+        return sucrate;
+    }
+
+    public void setSucrate(double sucrate) {
+        this.sucrate = sucrate;
+    }
+
+    public void addAcceptErrorCodes(int errorCode) {
+        this.acceptErrorCodes.add(errorCode);
+    }
+    
+    public boolean isAcceptableError(int errorCode){
+        if(acceptErrorCodes.size() == 0) {
+            return false;
+        }
+        
+        for(int i = 0; i < acceptErrorCodes.size() ; i++){
+            if(errorCode == acceptErrorCodes.get(i))
+                return true;
+        }
+        
+        return false;
     }
 
 
