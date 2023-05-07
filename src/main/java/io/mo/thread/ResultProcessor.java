@@ -211,8 +211,8 @@ public class ResultProcessor extends Thread{
         //String TOTAL        = "      TOTAL      ";
 
         return  TRANSNAME + ", " + TPS + ", " + QPS + ", " + SUCCESS+", " + ERROR + ", " 
-                + RT_MAX + ", " + RT_MIN + ", " + RT_AVG
-                + RT_25TH + ", " + RT_75TH + ", " + RT_90TH + ", " + RT_99TH;
+                + RT_MAX + ", " + RT_MIN + ", " + RT_AVG;
+                //+ RT_25TH + ", " + RT_75TH + ", " + RT_90TH + ", " + RT_99TH;
     }
 
     public String getResultOnly(int turn){
@@ -230,12 +230,14 @@ public class ResultProcessor extends Thread{
 //        String QPS       = cell_blk.substring(0,4)+execResult.getQps()+ cell_blk.substring(4+String.valueOf(execResult.getQps()).length(), cell_blk.length());
 //        String SUCCESS     = cell_blk.substring(0,2)+execResult.getTotalCount()+ cell_blk.substring(2+String.valueOf(execResult.getTotalCount()).length(), cell_blk.length());
 //        String ERROR     = cell_blk.substring(0,3)+execResult.getErrorCount()+ cell_blk.substring(3+String.valueOf(execResult.getErrorCount()).length(), cell_blk.length());
-        
-        execResult.computePercentile();
-        return String.format("%s: tps=%d,qps=%d,suc=%d,err=%d,rt_max=%d,rt_min=%d,rt_avg=%.2f,rt_25th=%.2f,rt_75=%.2f,rt_90=%.2f,rt_99=%.2f",
+//        long beginTime = System.currentTimeMillis();
+//        execResult.computePercentile();
+//        long endTime = System.currentTimeMillis();
+//        LOG.debug("Computing percentile costs : " + (endTime - beginTime));
+        return String.format("%s: tps=%d,qps=%d,suc=%d,err=%d,rt_max=%d,rt_min=%d,rt_avg=%.2f",//rt_25th=%.2f,rt_75=%.2f,rt_90=%.2f,rt_99=%.2f",
                 name, execResult.getTps(), execResult.getQps(), execResult.getTotalCount(), execResult.getErrorCount(),
-                execResult.getMax_rt(),execResult.getMin_rt(),execResult.getAvg_rt(),
-                execResult.getP25_rt(), execResult.getP75_rt(), execResult.getP90_rt(), execResult.getP99_rt());
+                execResult.getMax_rt(),execResult.getMin_rt(),execResult.getAvg_rt());
+                //execResult.getP25_rt(), execResult.getP75_rt(), execResult.getP90_rt(), execResult.getP99_rt());
     }
 
     public String getResult(int turn){
@@ -277,7 +279,7 @@ public class ResultProcessor extends Thread{
         summary.delete(0,summary.length());
         for(int i = 0;i < results.size();i++){
             ExecResult execResult = results.get(i);
-            execResult.computePercentile();
+            //execResult.computePercentile();
             summary.append("["+execResult.getName()+"]\n");
             summary.append("START : " + execResult.getStartTime()+"\n");
             summary.append("END : " + execResult.getEndTime()+"\n");
@@ -289,10 +291,10 @@ public class ResultProcessor extends Thread{
             summary.append("RT_MAX : " + execResult.getMax_rt()+"\n");
             summary.append("RT_MIN : " + execResult.getMin_rt()+"\n");
             summary.append("RT_AVG : " + String.format("%.2f",execResult.getAvg_rt())+"\n");
-            summary.append("RT_25TH : " + execResult.getP25_rt()+"\n");
-            summary.append("RT_75TH : " + execResult.getP75_rt()+"\n");
-            summary.append("RT_90TH : " + execResult.getP90_rt()+"\n");
-            summary.append("RT_99TH : " + execResult.getP99_rt()+"\n");
+//            summary.append("RT_25TH : " + execResult.getP25_rt()+"\n");
+//            summary.append("RT_75TH : " + execResult.getP75_rt()+"\n");
+//            summary.append("RT_90TH : " + execResult.getP90_rt()+"\n");
+//            summary.append("RT_99TH : " + execResult.getP99_rt()+"\n");
             summary.append("SUC_RATE : " + execResult.getSucRate()+"\n");
             summary.append("EXP_RATE : " + execResult.getExpRate()+"\n");
             summary.append("RESULT : " + (execResult.getSucRate() >= execResult.getExpRate() ? "SUCCEED" : "FAILED") + "\n");

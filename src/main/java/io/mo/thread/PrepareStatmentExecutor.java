@@ -56,8 +56,10 @@ public class PrepareStatmentExecutor {
         }
 
         ps = new PreparedStatement[1];
+        ps_sql = new String[1];
         try {
             ps[0] = connection.prepareStatement(command.getOriginalSql());
+            ps_sql[0] = command.getOriginalSql();
             LOG.debug(String.format("Succeed to prepare statemet [%s].", command.getOriginalSql()));
         } catch (SQLException e) {
             LOG.error(String.format("Failed to prepare statement [%s].", ps_sql[0]));

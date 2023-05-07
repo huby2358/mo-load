@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.math.Quantiles;
@@ -37,8 +38,8 @@ public class ExecResult {
     private ReentrantLock lock = new ReentrantLock();
 
 
-    private long totalTime = 0;
-    private long totalCount = 0;
+    private AtomicLong totalTime = new AtomicLong(0);
+    private AtomicLong totalCount = new AtomicLong(0);
     private long errorCount = 0;
 
     private int tps = 0;
@@ -129,47 +130,38 @@ public class ExecResult {
 
     
     public  void setTime(long start,long end){
-        try{
-            lock.lockInterruptibly();
-            long time = end - start;
-            if(rtValues.size() < 10000000)
-                rtValues.add(time);
-            else {
-                if (counter%10000000 == 10){
-                    rtValues.set(index,time);
-                }
-            }
-
-            counter++;
-            if(index < rtValues.size())
-                index++;
-            else 
-                index = 0;
-
-            if(max_rt < 0)  max_rt = time;
-            if(min_rt < 0)  min_rt = time;
-
-            if(this.start  == 0) this.start  = start;
-
-            if(this.end == 0)  this.end = end;
-
-            if(max_rt < time)  max_rt = time;
-
-            if(min_rt > time)  min_rt = time;
-
-            if(this.start > start)  this.start = start;
-
-            if(this.end < end) this.end = end;
-
-            totalTime += time;
-            totalCount++;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }finally {
-            if(lock.isHeldByCurrentThread()){
-                lock.unlock();
+        totalTime.addAndGet(end - start); 
+        totalCount.incrementAndGet();
+        long time = end - start;
+        if(rtValues.size() < 10000000)
+            rtValues.add(time);
+        else {
+            if (counter%10000000 == 10){
+                rtValues.set(index,time);
             }
         }
+
+        counter++;
+        if(index < rtValues.size())
+            index++;
+        else 
+            index = 0;
+
+        if(max_rt < 0)  max_rt = time;
+        if(min_rt < 0)  min_rt = time;
+
+        if(this.start  == 0) this.start  = start;
+
+        if(this.end == 0)  this.end = end;
+
+        if(max_rt < time)  max_rt = time;
+
+        if(min_rt > time)  min_rt = time;
+
+        if(this.start > start)  this.start = start;
+
+        if(this.end < end) this.end = end;
+       
     }
     
      
@@ -233,10 +225,10 @@ public class ExecResult {
     public float getAvg_rt() {
 
         //如果totalCount，说明还没有任何数据，直接返回null
-        if(totalCount <= 0 )
+        if(totalCount.longValue() <= 0 )
             return 0;
-        avg_rt = totalTime /totalCount;
-        return (float) totalTime /(float)totalCount;
+        avg_rt = totalTime.longValue() /totalCount.longValue();
+        return (float) totalTime.longValue() /(float)totalCount.longValue();
     }
 
     public int getQueryCount() {
@@ -248,19 +240,12 @@ public class ExecResult {
     }
     
     public long getTotalTime() {
-        return totalTime;
+        return totalTime.longValue();
     }
-
-    public void setTotalTime(long totalTime) {
-        this.totalTime = totalTime;
-    }
+    
 
     public long getTotalCount() {
-        return totalCount;
-    }
-
-    public void setTotalCount(int count) {
-        this.totalCount = count;
+        return totalCount.longValue();
     }
 
     public long getErrorCount(){
@@ -289,7 +274,7 @@ public class ExecResult {
         //如果end == 0，说明还没有任何数据，直接返回0
         if(this.end == 0)
             return 0;
-        this.tps = (int)((totalCount*1000/(this.end-this.start)));
+        this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
         return tps;
     }
 
@@ -309,7 +294,7 @@ public class ExecResult {
     public int getQps() {
         if(this.end == 0)
             return 0;
-        this.tps = (int)((totalCount*1000/(this.end-this.start)));
+        this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
         this.qps = this.tps * queryCount;
         return qps;
     }
@@ -366,7 +351,7 @@ public class ExecResult {
     }
     
     public double getSucRate(){
-        BigDecimal brate = new BigDecimal((double)this.totalCount/(double)(this.totalCount + this.errorCount));
+        BigDecimal brate = new BigDecimal((double)this.totalCount.longValue()/(double)(this.totalCount.longValue() + this.errorCount));
         return brate.setScale(5,BigDecimal.ROUND_HALF_UP).doubleValue();
     }
     
@@ -379,23 +364,52 @@ public class ExecResult {
     }
 
     public static void main(String[] args){
+        ReentrantLock lock1 = new ReentrantLock();
         long beginTime = System.currentTimeMillis();
-        ArrayList<Double> rtValues = new ArrayList<>(100000000);
-        for(int i = 0; i < 100000000;i++){
-            rtValues.add(Math.random()*100000);
+        ArrayList<Double> rtValues = new ArrayList<>(10000000);
+        for(int i = 0; i < 10000000;i++){
+            
+            rtValues.add(Math.random()*10000000);
         }
         long endTime = System.currentTimeMillis();
-        
-        System.out.println("gen data: " + (endTime - beginTime));
 
-        beginTime = System.currentTimeMillis();
-        Map<Integer,Double> percentile = Quantiles.percentiles().indexes(20,75,90,99).compute(rtValues);
-        endTime = System.currentTimeMillis();
-        System.out.println("compute data: " + (endTime - beginTime));
+        Runnable set = new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+
+                    try {
+
+                        rtValues.add(Math.random()*1000000);
+                        //lock1.lockInterruptibly();
+                        Thread.sleep(10);
+                    //System.out.println("size  : " + rtValues.size());
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }finally {
+                        //lock1.unlock();
+                    }
+                }
+            }
+        };
         
-        System.out.println("rt_25th = " + percentile.get(20));
-        System.out.println("rt_75th = " + percentile.get(75));
-        System.out.println("rt_90th = " + percentile.get(90));
-        System.out.println("rt_99th = " + percentile.get(99));
+        Runnable comp = new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+                    long beginTime = System.currentTimeMillis();
+                    Map<Integer, Double> percentile = Quantiles.percentiles().indexes(20, 75, 90, 99).compute(rtValues);
+                    long endTime = System.currentTimeMillis();
+                    System.out.println("comptute cost : " + (endTime - beginTime));
+                }
+            }
+        };
+        
+        new Thread(set).start();
+        new Thread(comp).start();
+        
+        
     }
+    
+    
 }
