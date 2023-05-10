@@ -124,7 +124,7 @@ public class ResultProcessor extends Thread{
                 format += "%s\n";
                 objs[i*2+1] = "|"+ cell_top_name +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+ cell_top +"|"+cell_top +"|"+ cell_top +"|";
                 
-                if(CONFIG.SHUTDOWN_SYSTEMOUT) {
+                if(CONFIG.SHUTDOWN_SYSTEMOUT && getResultOnly(i) != null) {
                     LOG.info(getResultOnly(i));
                 }
                 
