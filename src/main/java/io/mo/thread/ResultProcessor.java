@@ -71,22 +71,6 @@ public class ResultProcessor extends Thread{
                 throw new RuntimeException(e);
             }
         }
-        
-        //if there are no result data, wait until data comes
-        while (true){
-            for(int i = 0;i < results.size();i++){
-                if(getResult(i) == null){
-                    try {
-                        Thread.sleep(1000);
-                        continue;
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                    
-            }
-            break;
-        }
 
         if(!CONFIG.SHUTDOWN_SYSTEMOUT)
             System.out.println(getTitle());
@@ -146,8 +130,10 @@ public class ResultProcessor extends Thread{
                 
                 try {
                     Date now = new Date();
-                    trans_writer[i].write(dateFormat.format(now)+","+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
-                    trans_writer[i].flush();
+                    if(objs[i*2] != null) {
+                        trans_writer[i].write(dateFormat.format(now) + "," + objs[i * 2].substring(1).replaceAll(" ", "").replaceAll("\\|", ",") + "\n");
+                        trans_writer[i].flush();
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
