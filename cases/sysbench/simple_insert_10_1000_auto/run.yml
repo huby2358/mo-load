@@ -1,7 +1,7 @@
 #stdout=console, 过程数据输出到控制台和文件
 duration: 10 #所有transaction的执行时间，单位分钟
 transaction:
-  - name: "simple_insert_10_100"  #transaction名称
+  - name: "simple_insert_10_1000_auto"  #transaction名称
     vuser: 50   #执行该transaction测试的并发量
     mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
     prepared: "false"   #是否需要对script的sql进行prepare
