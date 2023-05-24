@@ -42,7 +42,7 @@ function profile() {
         curl http://${ad}:${port}/debug/pprof/profile?seconds=30 > ${WORKSPACE}/report/${runid}/prof/${ad}/cpu
         curl http://${ad}:${port}/debug/pprof/heap > ${WORKSPACE}/report/${runid}/prof/${ad}/heap
         curl http://${ad}:${port}/debug/pprof/goroutine?debug=2 -o ${WORKSPACE}/report/${runid}/prof/${ad}/goroutine.log
-        curl http://${ad}:${port}/debug/pprof/trace?seconds=30 -o ${WORKSPACE}/report/${runid}/prof/${ad}/trace.out
+        curl http://${ad}:${port}/debug/pprof/trace?seconds=10 -o ${WORKSPACE}/report/${runid}/prof/${ad}/trace.out
         echo "`date +'%Y-%m-%d %H:%M:%S'` Finish to get profile from server ${ad}"
       done 
     else
