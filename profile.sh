@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 WORKSPACE=$(cd `dirname $0`; pwd)
+pip3 install shyaml
+
 function profile() {
     if [ -f mo.yml ]; then
       local addr=`cat mo.yml | shyaml get-value profile.addr`
