@@ -191,6 +191,10 @@ if [[ "${METHOD}"x != x && "${METHOD}" != "SYSBENCH" ]]; then
 fi
 
 if [ "${PROFILE}" = "true" ]; then
+  if [ -f ${WORKSPACE}/report/.run ]; then
+    rm -rf ${WORKSPACE}/report/.run
+  fi
+  
   nohup ./profile.sh >> ${WORKSPACE}/log/profile.log &
 fi
 
