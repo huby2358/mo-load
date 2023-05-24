@@ -129,7 +129,7 @@ public class ExecResult {
     }
 
     
-    public  void setTime(long start,long end){
+    public synchronized void setTime(long start,long end){
         totalTime.addAndGet(end - start); 
         totalCount.incrementAndGet();
         long time = end - start;

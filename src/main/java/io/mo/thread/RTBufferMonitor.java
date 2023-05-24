@@ -42,7 +42,7 @@ public class RTBufferMonitor extends Thread {
                     tuple = buf.getRTtuple();
                 }
                 //writer.flush();
-                Thread.sleep(1000);
+                Thread.sleep(100);
 
             }
 

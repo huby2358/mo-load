@@ -3,8 +3,9 @@
 WORKSPACE=$(cd `dirname $0`; pwd)
 LIB_WORKSPACE=$WORKSPACE/lib
 CONFPATH=.
+PROFILE="false"
 
-while getopts ":c:n:m:t:d:s:h:p:u:P:b:gH" opt
+while getopts ":c:n:m:t:d:s:h:p:u:P:b:rgH" opt
 do
     case $opt in
         c)
@@ -73,6 +74,9 @@ do
         g)
         SHUTDOWN="--shutdown"
         ;;
+        r)
+        PROFILE="true"
+        ;;
         H)
         echo -e "Usage:　bash run.sh [option] [param] ...\nExcute mo oltp load task"
         echo -e "   -c  set config path, mo-load will use run.yml, replace.yml from this path"
@@ -109,6 +113,18 @@ java -Xms1024M -Xmx30720M -cp ${libJars} \
         io.mo.MOPerfTest ${DURATION} ${THREAD} ${SERVER_ADDR} ${SERVER_PORT} ${USER} ${PASSWORD} ${THREAD} ${DURATION} ${DATABASE} ${SHUTDOWN}
 }
 
+function test {
+local libJars libJar
+for libJar in `find ${LIB_WORKSPACE} -name "*.jar"`
+do
+  libJars=${libJars}:${libJar}
+done
+java -Xms1024M -Xmx30720M -cp ${libJars} \
+        -Drun.yml=${CONFPATH}/run.yml \
+        -Dreplace.yml=${CONFPATH}/replace.yml \
+        io.mo.DTest ${DURATION} ${THREAD}
+}
+
 function prepare {
 local libJars libJar
 for libJar in `find ${LIB_WORKSPACE} -name "*.jar"`
@@ -120,9 +136,62 @@ java -Xms1024M -Xmx30720M -cp ${libJars} \
         io.mo.sysbench.Sysbench ${TABLECOUNT} ${TABLESIZE}
 }
 
+function profile() {
+    if [ -f mo.yml ]; then
+      local addr=`cat mo.yml | shyaml get-value profile.addr`
+      if [ "${addr}"x == x ]; then
+        echo "the profile server addr is not configured, please check."
+        exit 0;
+      fi 
+      
+      local port=`cat mo.yml | shyaml get-value profile.port`
+      if [ "${port}"x == x ]; then
+        echo "the profile server addr is not configured, please check."
+        exit
+      fi
+            
+      local think=`cat mo.yml | shyaml get-value profile.think`
+      if [ "${port}"x == x ]; then
+        think=60
+      fi
+      
+      echo "addr=${addr}"
+      echo "port=${port}"
+      echo "think=${think}"
+    else
+      exit 0;
+    fi
+    
+    sleep ${think}
+    
+    if [ -f ${WORKSPACE}/report/.run ]; then
+      local runid=`cat ${WORKSPACE}/report/.run`
+      OLD_IFS="$IFS"
+      IFS=","
+      addrs=(${addr})
+      IFS="$OLD_IFS"
+      
+      for ad in ${addrs[@]}
+      do
+        mkdir -p ${WORKSPACE}/report/${runid}/prof/${ad}
+        curl http://${ad}:${port}/debug/pprof/profile?seconds=30 > ${WORKSPACE}/report/${runid}/prof/${ad}/cpu
+        curl http://${ad}:${port}/debug/pprof/heap > ${WORKSPACE}/report/${runid}/prof/${ad}/heap
+        curl http://${ad}:${port}/debug/pprof/goroutine?debug=2 -o ${WORKSPACE}/report/${runid}/prof/${ad}/goroutine.log
+        curl http://${ad}:${port}/debug/pprof/trace?seconds=30 -o ${WORKSPACE}/report/${runid}/prof/${ad}/trace.out
+      done 
+    else
+      exit 0;
+    fi 
+        
+}
+
 if [[ "${METHOD}"x != x && "${METHOD}" != "SYSBENCH" ]]; then
   echo "The method must be SYSBENCH or None, [${METHOD}] is not supported"
   exit 1
+fi
+
+if [ "${PROFILE}" = "true" ]; then
+  nohup ./profile.sh >> ${WORKSPACE}/log/profile.log &
 fi
 
 if [ "${METHOD}" = "SYSBENCH" ]; then

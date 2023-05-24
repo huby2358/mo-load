@@ -25,4 +25,8 @@ jdbc:
 user:
   name: "dump"
   password: "111"
-
+  
+profile:
+  addr: "127.0.0.1"
+  port: 9876
+  think: 120

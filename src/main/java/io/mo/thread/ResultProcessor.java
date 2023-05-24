@@ -30,6 +30,7 @@ public class ResultProcessor extends Thread{
 
     private FileWriter error_writer;
     private FileWriter summary_writer;
+    private FileWriter runid_writer;
     private FileWriter[] trans_writer;
     private StringBuffer summary;
     
@@ -71,6 +72,15 @@ public class ResultProcessor extends Thread{
                 throw new RuntimeException(e);
             }
         }
+        
+        try{
+            runid_writer = new FileWriter("report/.run");
+            runid_writer.write(CONFIG.EXECUTENAME);
+            runid_writer.flush();
+            runid_writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         if(!CONFIG.SHUTDOWN_SYSTEMOUT)
             System.out.println(getTitle());
@@ -94,8 +104,10 @@ public class ResultProcessor extends Thread{
                     
                     try {
                         Date now = new Date();
-                        trans_writer[i].write(dateFormat.format(now)+","+ objs[i*2].substring(1).replaceAll(" ","").replaceAll("\\|",",")+"\n");
-                        trans_writer[i].flush();
+                        if(objs[i*2] != null) {
+                            trans_writer[i].write(dateFormat.format(now) + "," + objs[i * 2].substring(1).replaceAll(" ", "").replaceAll("\\|", ",") + "\n");
+                            trans_writer[i].flush();
+                        }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
