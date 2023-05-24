@@ -28,5 +28,5 @@ user:
   
 profile:
   addr: "127.0.0.1"
-  port: 9876
+  port: 6060
   think: 120
