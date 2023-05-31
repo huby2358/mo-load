@@ -3,6 +3,7 @@ package io.mo.thread;
 import io.mo.CONFIG;
 import io.mo.transaction.TransBuffer;
 import io.mo.transaction.Transaction;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,8 @@ public class TransBufferProducer extends Thread {
     private int read_total = 0;
 
     private boolean terminated = false;
+
+    private static Logger LOG = Logger.getLogger(TransBufferProducer.class);
 
     public TransBufferProducer(){
 

@@ -1,7 +1,9 @@
 package io.mo.transaction;
 
 import io.mo.CONFIG;
+import io.mo.thread.TransBufferProducer;
 import io.mo.util.ReplaceConfigUtil;
+import org.apache.log4j.Logger;
 
 import java.io.FileWriter;
 
@@ -23,6 +25,8 @@ public class TransBuffer {
 
     private Transaction transaction;
 
+    private static Logger LOG = Logger.getLogger(TransBuffer.class);
+    
     public TransBuffer(Transaction transaction){
         this.transaction = transaction;
     }
@@ -45,6 +49,7 @@ public class TransBuffer {
 
     public void forward(){
         if(write_time - read_time > scripts.length -1){
+            LOG.debug("The trans buffer is full, do not need to supply.");
             return;
         }
         SQLScript script = transaction.createNewScript();
