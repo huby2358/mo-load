@@ -78,11 +78,11 @@ public class SysBenchLoader implements Runnable{
                     
                     insert_dml.append("(");
                     insert_dml.append(getRandom4Number());
-                    insert_dml.append(",");
+                    insert_dml.append(",'");
                     insert_dml.append(getRandomChar(120));
-                    insert_dml.append(",");
+                    insert_dml.append("','");
                     insert_dml.append(getRandomChar(60));
-                    insert_dml.append(")");
+                    insert_dml.append("')");
                     //stmt.execute(sql);
                     if(j % batch_size == 0 || j == size ) {
                         insert_dml.append(";");
@@ -108,15 +108,14 @@ public class SysBenchLoader implements Runnable{
                     insert_auto_dml.append(j);
                     insert_auto_dml.append(",");
                     insert_auto_dml.append(getRandom4Number());
-                    insert_auto_dml.append(",");
+                    insert_auto_dml.append(",'");
                     insert_auto_dml.append(getRandomChar(120));
-                    insert_auto_dml.append(",");
+                    insert_auto_dml.append("','");
                     insert_auto_dml.append(getRandomChar(60));
-                    insert_auto_dml.append(")");
+                    insert_auto_dml.append("')");
                     //stmt.execute(sql);
                     if(j % batch_size == 0 || j == size ) {
                         insert_auto_dml.append(";");
-                        //System.out.println(insert_auto_dml.toString());
                         stmt.execute(insert_auto_dml.toString());
                         insert_auto_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
                     }  else
@@ -156,5 +155,11 @@ public class SysBenchLoader implements Runnable{
                 shortBuffer.append("-");
         }
         return shortBuffer.toString();
+    }
+    
+    public static void main(String[] args){
+        SysBenchLoader loader = new SysBenchLoader(null,0,0,true,0,null);
+        System.out.println(loader.getRandomChar(60));
+        
     }
 }
