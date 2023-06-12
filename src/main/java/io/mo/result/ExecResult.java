@@ -33,7 +33,7 @@ public class ExecResult {
     
     private double expRate = 1;
     
-    private ArrayList<Long> rtValues = new ArrayList<>(10000000);
+    //private ArrayList<Long> rtValues = new ArrayList<>(10000000);
     
     private ReentrantLock lock = new ReentrantLock();
 
@@ -133,19 +133,19 @@ public class ExecResult {
         totalTime.addAndGet(end - start); 
         totalCount.incrementAndGet();
         long time = end - start;
-        if(rtValues.size() < 10000000)
-            rtValues.add(time);
-        else {
-            if (counter%10000000 == 10){
-                rtValues.set(index,time);
-            }
-        }
+//        if(rtValues.size() < 10000000)
+//            rtValues.add(time);
+//        else {
+//            if (counter%10000000 == 10){
+//                rtValues.set(index,time);
+//            }
+//        }
 
-        counter++;
-        if(index < rtValues.size())
-            index++;
-        else 
-            index = 0;
+//        counter++;
+//        if(index < rtValues.size())
+//            index++;
+//        else 
+//            index = 0;
 
         if(max_rt < 0)  max_rt = time;
         if(min_rt < 0)  min_rt = time;
@@ -166,17 +166,17 @@ public class ExecResult {
     
      
     
-    public void computePercentile(){
-        Map<Integer,Double> percentile = Quantiles.percentiles().indexes(25,75,90,99).compute(rtValues);
-        rt_25th = percentile.get(25);
-        rt_75th = percentile.get(75);
-        rt_90th = percentile.get(90);
-        rt_99th = percentile.get(99);
-    }
-    
-    public Map<Integer,Double> getPercentileMap(){
-        return Quantiles.percentiles().indexes(20,75,90,99).compute(rtValues);
-    }
+//    public void computePercentile(){
+//        Map<Integer,Double> percentile = Quantiles.percentiles().indexes(25,75,90,99).compute(rtValues);
+//        rt_25th = percentile.get(25);
+//        rt_75th = percentile.get(75);
+//        rt_90th = percentile.get(90);
+//        rt_99th = percentile.get(99);
+//    }
+//    
+//    public Map<Integer,Double> getPercentileMap(){
+//        return Quantiles.percentiles().indexes(20,75,90,99).compute(rtValues);
+//    }
 
     public void setName(String name) {
         this.name = name;
