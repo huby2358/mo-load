@@ -120,9 +120,9 @@ public class TransExecutor implements Runnable {
                         errorMessage.setSql(currentSql);
                         errorMessage.setErrorCode(e.getErrorCode());
                         errorMessage.setErrorMessage(e.getMessage());
-                        
                         if(!this.transaction.isAcceptableError(e.getErrorCode())){
                             execResult.setError(errorMessage,false);
+                            LOG.error(errorMessage.toString());
                         }else {
                             execResult.setError(errorMessage,true);
                             errorMessage.setExpected("true");
@@ -177,9 +177,9 @@ public class TransExecutor implements Runnable {
                         errorMessage.setParas(currentPrepareExecutor.getCurrentParas());
                         errorMessage.setErrorCode(e.getErrorCode());
                         errorMessage.setErrorMessage(e.getMessage());
-
                         if(!this.transaction.isAcceptableError(e.getErrorCode())){
                             execResult.setError(errorMessage,false);
+                            LOG.error(errorMessage.toString());
                         }else {
                             errorMessage.setExpected("true");
                             execResult.setError(errorMessage,true);
@@ -242,9 +242,9 @@ public class TransExecutor implements Runnable {
                         errorMessage.setSql(currentSql);
                         errorMessage.setErrorCode(e.getErrorCode());
                         errorMessage.setErrorMessage(e.getMessage());
-
                         if(!this.transaction.isAcceptableError(e.getErrorCode())){
                             execResult.setError(errorMessage,false);
+                            LOG.error(errorMessage.toString());
                         }else {
                             execResult.setError(errorMessage,true);
                             errorMessage.setExpected("true");
@@ -294,9 +294,9 @@ public class TransExecutor implements Runnable {
                         errorMessage.setParas(currentPrepareExecutor.getCurrentParas());
                         errorMessage.setErrorCode(e.getErrorCode());
                         errorMessage.setErrorMessage(e.getMessage());
-
                         if(!this.transaction.isAcceptableError(e.getErrorCode())){
                             execResult.setError(errorMessage,false);
+                            LOG.error(errorMessage.toString());
                         }else {
                             execResult.setError(errorMessage,true);
                             errorMessage.setExpected("true");
