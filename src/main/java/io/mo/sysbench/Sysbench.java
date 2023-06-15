@@ -24,6 +24,8 @@ public class Sysbench {
     
     public static String auto_incr = SysbenchConfUtil.getSysbenchAutoIncrement(); 
     
+    public static int loadWorkerNum = SysbenchConfUtil.getLoaderWoker();
+    
     public static Random random = new Random();
 
     private static Logger LOG = Logger.getLogger(Sysbench.class.getName());
@@ -81,6 +83,9 @@ public class Sysbench {
             if(cmd.hasOption("s"))
                 tbl_size = Integer.parseInt(cmd.getOptionValue('s'));
 
+            if(cmd.hasOption("t"))
+                loadWorkerNum = Integer.parseInt(cmd.getOptionValue('t'));
+
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +97,7 @@ public class Sysbench {
         String insert_dml = "INSERT INTO `tablename` VALUES(?,?,?,?)";
         String insert_auto_dml = "INSERT INTO `tablename`(`k`,`c`,`pad`) VALUES(?,?,?)";
 
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        ExecutorService executor = Executors.newFixedThreadPool(loadWorkerNum);
         CountDownLatch latch = new CountDownLatch(tbl_conut);
         
         try {

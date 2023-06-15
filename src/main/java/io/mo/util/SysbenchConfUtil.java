@@ -47,6 +47,11 @@ public class SysbenchConfUtil {
         return (int)conf.get("batchSize");
     }
 
+    public static int getLoaderWoker(){
+        if(conf == null) init();
+        return (int)conf.get("loadWorker");
+    }
+
     public static void main(String[] args){
         System.out.println(getSysbenchDb());
         System.out.println(getSysbenchTableSize());

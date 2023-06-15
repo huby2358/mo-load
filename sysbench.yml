@@ -10,3 +10,5 @@ tableSize: 10000
 autoIncrement: "false"
 #batch size when loading data
 batchSize: 10000
+#load worker num
+loadWorker: 10
