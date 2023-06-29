@@ -1,7 +1,9 @@
 package io.mo.para;
 
 import io.mo.CONFIG;
+import io.mo.MOPerfTest;
 import io.mo.util.ReplaceConfigUtil;
+import org.apache.log4j.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -30,6 +32,7 @@ public class PreparedPara {
         this.org_value = org_value;
     }
 
+    private static Logger LOG = Logger.getLogger(PreparedPara.class.getName());
 
 
     public PreparedPara(String type,String org_value){
@@ -51,6 +54,16 @@ public class PreparedPara {
 
     public int getIntValue(){
         //System.out.println("int_values.size = " + int_values.size());
+        Integer value = int_values.poll();
+        while (value == null){
+            LOG.warn("There is one prepared parameter queue has been empty, and will wait for 1 second.");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            value = int_values.poll();
+        }
         return int_values.poll();
     }
 
