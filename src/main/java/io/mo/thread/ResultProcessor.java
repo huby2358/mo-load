@@ -248,7 +248,10 @@ public class ResultProcessor extends Thread{
         String TRANSNAME = cell_blk_name.substring(0,2)+name+ cell_blk_name.substring(2+name.length(), cell_blk_name.length());
         String RT_MAX    = cell_blk.substring(0,3)+execResult.getMax_rt()+ cell_blk.substring(3+String.valueOf(execResult.getMax_rt()).length(), cell_blk.length());
         String RT_MIN    = cell_blk.substring(0,3)+execResult.getMin_rt()+ cell_blk.substring(3+String.valueOf(execResult.getMin_rt()).length(), cell_blk.length());
-        String RT_AVG    = cell_blk.substring(0,3)+String.format("%.2f",execResult.getAvg_rt())+ cell_blk.substring(3+String.format("%.2f",execResult.getAvg_rt()).length(), cell_blk.length());
+        float avg_rt = execResult.getAvg_rt();
+        while (String.format("%.2f",avg_rt).length() >= 5) 
+            avg_rt =  execResult.getAvg_rt();
+        String RT_AVG    = cell_blk.substring(0,3)+String.format("%.2f",avg_rt)+ cell_blk.substring(3+String.format("%.2f",avg_rt).length(), cell_blk.length());
         String TPS       = cell_blk.substring(0,4)+execResult.getTps()+ cell_blk.substring(4+String.valueOf(execResult.getTps()).length(), cell_blk.length());
         String QPS       = cell_blk.substring(0,4)+execResult.getQps()+ cell_blk.substring(4+String.valueOf(execResult.getQps()).length(), cell_blk.length());
         String SUCCESS     = cell_blk.substring(0,2)+execResult.getTotalCount()+ cell_blk.substring(2+String.valueOf(execResult.getTotalCount()).length(), cell_blk.length());
