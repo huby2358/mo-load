@@ -133,7 +133,7 @@ do
 done
 java -Xms1024M -Xmx30720M -cp ${libJars} \
         -Dsysbench.yml=${CONFPATH}/sysbench.yml \
-        io.mo.sysbench.Sysbench ${TABLECOUNT} ${TABLESIZE} ${THREAD}
+        io.mo.sysbench.Sysbench ${TABLECOUNT} ${TABLESIZE} ${THREAD}  ${SERVER_ADDR} ${SERVER_PORT} ${USER} ${PASSWORD}
 }
 
 function profile() {
