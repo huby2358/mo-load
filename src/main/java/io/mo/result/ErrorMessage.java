@@ -15,11 +15,13 @@ public class ErrorMessage {
     private String[] paras = null;
     private int errorCode = -1;
     private String errorMessage = null;
+
+    private String requestTime = null;
     private StringBuffer buffer = new StringBuffer();
 
     private String expected = "false";
     
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     public ErrorMessage(){
         this.errorTime = format.format(new Date());
@@ -74,11 +76,24 @@ public class ErrorMessage {
     public void setExpected(String expected) {
         this.expected = expected;
     }
+
+    public String getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(String requestTime) {
+        this.requestTime = requestTime;
+    }
     
     public String toString(){
-
-        buffer.append("DateTime : ");
+        buffer.append("\n");
+        
+        buffer.append("ErrorTime : ");
         buffer.append(errorTime);
+        buffer.append("\n");
+
+        buffer.append("RequestTime : ");
+        buffer.append(requestTime);
         buffer.append("\n");
         
         buffer.append("TxnName : ");

@@ -16,11 +16,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.concurrent.CyclicBarrier;
 
 public class TransExecutor implements Runnable {
     private static Logger LOG = Logger.getLogger(TransExecutor.class.getName());
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private TransBuffer transBuffer;
 
@@ -100,12 +102,13 @@ public class TransExecutor implements Runnable {
             if(!transaction.isPrepared()){
                 while(!CONFIG.TIMEOUT) {
                     SQLScript script = transBuffer.getScript();
-
+                    long currentRequestTime = 0;
                     try {
                         long beginTime = System.currentTimeMillis();
                         //statement.execute("begin;");
                         for (int i = 0; i < script.length(); i++) {
                             currentSql = script.getCommand(i);
+                            currentRequestTime = System.currentTimeMillis();
                             boolean rs = statement.execute(currentSql);
                         }
                         //statement.execute("commit;");
@@ -116,6 +119,7 @@ public class TransExecutor implements Runnable {
                         rtBuffer.setValue(beginTime,endTime);
                     } catch (SQLException e) {
                         ErrorMessage errorMessage = new ErrorMessage();
+                        errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
                         errorMessage.setTxnName(transName);
                         errorMessage.setSql(currentSql);
                         errorMessage.setErrorCode(e.getErrorCode());
@@ -156,10 +160,12 @@ public class TransExecutor implements Runnable {
             else{
                 SQLScript script = transaction.getScript();
                 while(!CONFIG.TIMEOUT){
+                    long currentRequestTime = 0;
                     try {
                         long beginTime = System.currentTimeMillis();
                         for (int i = 0; i < script.length(); i++) {
                             currentPrepareExecutor = prepareStatmentExecutors[i];
+                            currentRequestTime = System.currentTimeMillis();
                             prepareStatmentExecutors[i].execute();
                         }
                         
@@ -172,6 +178,7 @@ public class TransExecutor implements Runnable {
                     }catch (SQLException e){
 
                         ErrorMessage errorMessage = new ErrorMessage();
+                        errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
                         errorMessage.setTxnName(transName);
                         errorMessage.setSql(currentPrepareExecutor.getCurrentSql());
                         errorMessage.setParas(currentPrepareExecutor.getCurrentParas());
@@ -224,10 +231,12 @@ public class TransExecutor implements Runnable {
 
                 while(!CONFIG.TIMEOUT){
                     SQLScript script = transBuffer.getScript();
+                    long currentRequestTime = 0;
                     try {
                         long beginTime = System.currentTimeMillis();
                         for(int i = 0; i < script.length();i++){
                             currentSql = script.getCommand(i);
+                            currentRequestTime = System.currentTimeMillis();
                             boolean rs = statement.execute(currentSql);
                         }
                         long endTime = System.currentTimeMillis();
@@ -238,6 +247,7 @@ public class TransExecutor implements Runnable {
                     } catch (SQLException e) {
 
                         ErrorMessage errorMessage = new ErrorMessage();
+                        errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
                         errorMessage.setTxnName(transName);
                         errorMessage.setSql(currentSql);
                         errorMessage.setErrorCode(e.getErrorCode());
@@ -275,10 +285,12 @@ public class TransExecutor implements Runnable {
 
                 SQLScript script = transaction.getScript();
                 while(!CONFIG.TIMEOUT){
+                    long currentRequestTime = 0;
                     try {
                         long beginTime = System.currentTimeMillis();
                         for (int i = 0; i < script.length(); i++) {
                             currentPrepareExecutor = prepareStatmentExecutors[i];
+                            currentRequestTime = System.currentTimeMillis();
                             prepareStatmentExecutors[i].execute();
                         }
                         long endTime = System.currentTimeMillis();
@@ -289,6 +301,7 @@ public class TransExecutor implements Runnable {
                     }catch (SQLException e){
 
                         ErrorMessage errorMessage = new ErrorMessage();
+                        errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
                         errorMessage.setTxnName(transName);
                         errorMessage.setSql(currentPrepareExecutor.getCurrentSql());
                         errorMessage.setParas(currentPrepareExecutor.getCurrentParas());
@@ -334,5 +347,9 @@ public class TransExecutor implements Runnable {
         running = false;
         rtBuffer.setValid(false);
         LOG.debug(String.format("Thread[id=%d] has been stoped.",id));
+    }
+    
+    public static void main(String[] args){
+        System.out.println(simpleDateFormat.format(System.currentTimeMillis()));
     }
 }
