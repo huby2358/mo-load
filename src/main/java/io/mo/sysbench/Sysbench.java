@@ -113,6 +113,7 @@ public class Sysbench {
             
             for(int i = 1; i < tbl_conut + 1 ; i++) {
                 Connection conLoad = ConnectionOperation.getConnection();
+                conLoad.setCatalog(db_name);
                 if (conLoad == null) {
                     LOG.error(" mo-load can not get invalid connection after trying 3 times, and the program will exit");
                     System.exit(1);
