@@ -135,6 +135,9 @@ public class TransExecutor implements Runnable {
                         
                         try {
                             if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
+                                if(!connection.isClosed()){
+                                    connection.close();
+                                }
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
@@ -195,6 +198,9 @@ public class TransExecutor implements Runnable {
                         
                         try {
                             if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
+                                if(!connection.isClosed()){
+                                    connection.close();
+                                }
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
@@ -263,6 +269,9 @@ public class TransExecutor implements Runnable {
                         
                         try {
                             if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
+                                if(!connection.isClosed()){
+                                    connection.close();
+                                }
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
@@ -318,6 +327,9 @@ public class TransExecutor implements Runnable {
                         
                         try {
                             if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
+                                if(!connection.isClosed()){
+                                    connection.close();
+                                }
                                 connection = ConnectionOperation.getConnection();
                                 if(connection == null){
                                     running = false;
