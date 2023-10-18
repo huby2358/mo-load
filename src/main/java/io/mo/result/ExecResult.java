@@ -24,6 +24,10 @@ public class ExecResult {
     private long avg_rt = 0;
     private long min_rt = -1;
     
+    private long report_total = 0;
+    private long report_account = 0;
+    private long report_start = 0;
+    private long report_end = 0;
     private double rt_25th = -1;
 
     private double rt_75th = -1;
@@ -133,25 +137,18 @@ public class ExecResult {
         totalTime.addAndGet(end - start); 
         totalCount.incrementAndGet();
         long time = end - start;
-//        if(rtValues.size() < 10000000)
-//            rtValues.add(time);
-//        else {
-//            if (counter%10000000 == 10){
-//                rtValues.set(index,time);
-//            }
-//        }
-
-//        counter++;
-//        if(index < rtValues.size())
-//            index++;
-//        else 
-//            index = 0;
+        
+        report_account++;
+        report_total += time;
+        
 
         if(max_rt < 0)  max_rt = time;
         if(min_rt < 0)  min_rt = time;
 
         if(this.start  == 0) this.start  = start;
-
+        if(this.report_start  == 0) this.report_start  = start;
+        
+        if(this.report_end  == 0) this.report_end  = end;
         if(this.end == 0)  this.end = end;
 
         if(max_rt < time)  max_rt = time;
@@ -160,7 +157,10 @@ public class ExecResult {
 
         if(this.start > start)  this.start = start;
 
+        if(this.report_start  > start) this.report_start  = start;
+
         if(this.end < end) this.end = end;
+        if(this.report_end < end) this.report_end = end;
        
     }
     
@@ -225,9 +225,18 @@ public class ExecResult {
     public float getAvg_rt() {
 
         //如果totalCount，说明还没有任何数据，直接返回null
-        if(totalCount.longValue() <= 0 )
+        if(report_total <= 0 )
             return 0;
-        avg_rt = totalTime.longValue() /totalCount.longValue();
+        //avg_rt = totalTime.longValue() /totalCount.longValue();
+        return (float) report_total /(float)report_account;
+    }
+
+    public float getTotalAvg_rt() {
+
+        //如果totalCount，说明还没有任何数据，直接返回null
+        if(totalTime.longValue() <= 0 )
+            return 0;
+        //avg_rt = totalTime.longValue() /totalCount.longValue();
         return (float) totalTime.longValue() /(float)totalCount.longValue();
     }
 
@@ -271,12 +280,40 @@ public class ExecResult {
     }
 
     public int getTps(){
-        //如果end == 0，说明还没有任何数据，直接返回0
+        //如果end == 0，说明还没有任何数据，直接返回
+        if(this.report_end == 0)
+            return 0;
+        this.tps = (int)((report_account*1000/(this.report_end-this.report_start)));
+        return tps;
+    }
+
+    public int getTotalTps(){
+        //如果end == 0，说明还没有任何数据，直接返回
         if(this.end == 0)
             return 0;
         this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
         return tps;
     }
+
+    public int getQps() {
+        if(this.report_end == 0)
+            return 0;
+        //this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
+        this.tps = (int)((report_account*1000/(this.report_end-this.report_start)));
+        this.qps = this.tps * queryCount;
+        return qps;
+    }
+
+    public int getTotalQps() {
+        if(this.end == 0)
+            return 0;
+        //this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
+        this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
+        this.qps = this.tps * queryCount;
+        return qps;
+    }
+    
+    
 
     public void setTps(int tps) {
         this.tps = tps;
@@ -290,13 +327,11 @@ public class ExecResult {
         this.terminated = terminated;
     }
 
-
-    public int getQps() {
-        if(this.end == 0)
-            return 0;
-        this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
-        this.qps = this.tps * queryCount;
-        return qps;
+    public synchronized void reset(){
+        this.report_start = 0;
+        this.report_end = 0;
+        this.report_total = 0;
+        this.report_account = 0;
     }
 
     public void setQps(int qps) {

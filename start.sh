@@ -5,7 +5,7 @@ LIB_WORKSPACE=$WORKSPACE/lib
 CONFPATH=.
 PROFILE="false"
 
-while getopts ":c:n:m:t:d:s:h:p:u:P:b:rgH" opt
+while getopts ":c:n:m:t:d:s:h:p:u:P:b:i:rgH" opt
 do
     case $opt in
         c)
@@ -77,6 +77,9 @@ do
         r)
         PROFILE="true"
         ;;
+        i)
+        REPORT_INTERVAL="--report-interval=${OPTARG}"
+        ;;
         H)
         echo -e "Usage:　bash run.sh [option] [param] ...\nExcute mo oltp load task"
         echo -e "   -c  set config path, mo-load will use run.yml, replace.yml from this path"
@@ -91,6 +94,7 @@ do
         echo -e "   -p  password of user for connection"
         echo -e "   -b  database for connection"
         echo -e "   -g  shut down tracing real progress data by system-out"
+        echo -e "   -i  set report report interval time"
         echo "For more support,please email to sudong@matrixorigin.io"
         exit 1
         ;;
@@ -110,7 +114,7 @@ done
 java -Xms1024M -Xmx30720M -cp ${libJars} \
         -Drun.yml=${CONFPATH}/run.yml \
         -Dreplace.yml=${CONFPATH}/replace.yml \
-        io.mo.MOPerfTest ${DURATION} ${THREAD} ${SERVER_ADDR} ${SERVER_PORT} ${USER} ${PASSWORD} ${THREAD} ${DURATION} ${DATABASE} ${SHUTDOWN}
+        io.mo.MOPerfTest ${DURATION} ${THREAD} ${SERVER_ADDR} ${SERVER_PORT} ${USER} ${PASSWORD} ${THREAD} ${DURATION} ${DATABASE} ${SHUTDOWN} ${REPORT_INTERVAL}
 }
 
 function test {

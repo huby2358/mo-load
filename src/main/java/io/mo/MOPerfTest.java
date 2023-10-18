@@ -49,6 +49,7 @@ public class MOPerfTest {
         options.addOption("d",true,"The duration that all transactions will run");
         options.addOption("b","db",true,"The duration that all transactions will run");
         options.addOption("g","shutdown",false,"shut down tracing real progress data by system-out");
+        options.addOption("i","report-interval",true,"shut down tracing real progress data by system-out");
         
         CommandLineParser parser = new DefaultParser();
         try {
@@ -87,6 +88,9 @@ public class MOPerfTest {
 
             if(cmd.hasOption("shutdown"))
                 CONFIG.SHUTDOWN_SYSTEMOUT = true;
+
+            if(cmd.hasOption("report-interval"))
+                CONFIG.REPORT_INTERVAL = Integer.parseInt(cmd.getOptionValue("report-interval"))*1000;
             
         } catch (ParseException e) {
             throw new RuntimeException(e);

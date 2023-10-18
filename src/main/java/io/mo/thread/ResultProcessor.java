@@ -161,7 +161,12 @@ public class ResultProcessor extends Thread{
             }
 
             try {
-                Thread.sleep(1000);
+                for(int k = 0; k < results.size(); k++){
+                    ExecResult execResult = results.get(k);
+                    execResult.reset();
+                }
+                Thread.sleep(CONFIG.REPORT_INTERVAL);
+                
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -174,7 +179,6 @@ public class ResultProcessor extends Thread{
                 throw new RuntimeException(e);
             }
         }
-
     }
 
     public String getTitle(){
@@ -288,13 +292,13 @@ public class ResultProcessor extends Thread{
             summary.append("START : " + execResult.getStartTime()+"\n");
             summary.append("END : " + execResult.getEndTime()+"\n");
             summary.append("VUSER : " + execResult.getVuser()+"\n");
-            summary.append("TPS : " + execResult.getTps()+"\n");
-            summary.append("QPS : " + execResult.getQps()+"\n");
+            summary.append("TPS : " + execResult.getTotalTps()+"\n");
+            summary.append("QPS : " + execResult.getTotalQps()+"\n");
             summary.append("SUCCESS : " + execResult.getTotalCount()+"\n");
             summary.append("ERROR : " + execResult.getErrorCount()+"\n");
             summary.append("RT_MAX : " + execResult.getMax_rt()+"\n");
             summary.append("RT_MIN : " + execResult.getMin_rt()+"\n");
-            summary.append("RT_AVG : " + String.format("%.2f",execResult.getAvg_rt())+"\n");
+            summary.append("RT_AVG : " + String.format("%.2f",execResult.getTotalAvg_rt())+"\n");
 //            summary.append("RT_25TH : " + execResult.getP25_rt()+"\n");
 //            summary.append("RT_75TH : " + execResult.getP75_rt()+"\n");
 //            summary.append("RT_90TH : " + execResult.getP90_rt()+"\n");

@@ -36,4 +36,6 @@ public class CONFIG {
     public static String SPEC_DATABASE = null;
     
     public static boolean SHUTDOWN_SYSTEMOUT = false;
+    
+    public static int REPORT_INTERVAL = 1000;
 }
