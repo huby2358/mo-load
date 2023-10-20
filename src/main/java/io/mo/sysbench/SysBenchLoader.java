@@ -69,7 +69,7 @@ public class SysBenchLoader implements Runnable{
             if (auto_incr) {
                 //create table
                 stmt.execute(tbl_create_auto_ddl.replace("tablename", tbl_name));
-                LOG.info(String.format("Table %s has been created successfully, and cost:%s s", tbl_name));
+                LOG.info(String.format("Table %s has been created successfully", tbl_name));
                 StringBuffer insert_dml = new StringBuffer("INSERT INTO " + tbl_name +"(k,c,pad) VALUES");
                 //batch insert
                 long start = System.currentTimeMillis();
@@ -99,7 +99,7 @@ public class SysBenchLoader implements Runnable{
             } else {
                 //create table
                 stmt.execute(tbl_create_ddl.replace("tablename", tbl_name));
-                LOG.info(String.format("Table %s has been created successfully, and cost:%s s", tbl_name));
+                LOG.info(String.format("Table %s has been created successfully", tbl_name));
                 //batch insert
                 //con.setAutoCommit(false);
                 StringBuffer insert_auto_dml = new StringBuffer("INSERT INTO " + tbl_name +" VALUES");
