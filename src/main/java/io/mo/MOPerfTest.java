@@ -129,9 +129,12 @@ public class MOPerfTest {
                 }
             });
 
+            long[] timeCost = new long[5];
             Thread[] thread = new Thread[t_num];
             for(int j = 0;j < t_num;j++){
                 try {
+                    long t0 = System.currentTimeMillis();
+
                     //获取db连接，每个executor负责一个链接
                     Connection connection = ConnectionOperation.getConnection();
                     if(connection == null){
@@ -140,15 +143,23 @@ public class MOPerfTest {
                     }
                     hookThread.addConnection(connection);
 
+                    long t1 = System.currentTimeMillis();
+                    timeCost[0] += t1 - t0;
+
                     //初始化发送缓冲区，每个executor拥有一个发送缓冲区
                     TransBuffer buffer = new TransBuffer(transactions[i]);
                     executors[j] = new TransExecutor(j,connection,buffer,execResult[i],barrier);
-                    
+
+                    long t2 = System.currentTimeMillis();
+                    timeCost[1] += t2 - t1;
+
                     if(!transactions[i].isPrepared()){
                         //将该加入到发送缓冲区生成器队列中，用于重新补充缓冲区中已经被发送过的事务
                         transBufferProducer.addBuffer(buffer);
                         //执行前，先初始化并填满每个线程的发送队列
                         buffer.fill();
+
+                        timeCost[2] += System.currentTimeMillis() - t2;
                     }else {
                         PreparedSQLCommand[] commands = transactions[i].getScript().getPreparedCommands();
                         for(int k = 0; k < commands.length; k++){
@@ -164,9 +175,12 @@ public class MOPerfTest {
 
                             executors[j].addPrepareStatmentExecutor(prepareStatmentExecutor);
                         }
+                        timeCost[3] += System.currentTimeMillis() - t2;
                     }
 
+                    long t3 = System.currentTimeMillis();
                     thread[j] = new Thread(executors[j]);
+                    timeCost[4] += System.currentTimeMillis() - t3;
                     //services[i].execute(executors[j]);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -174,6 +188,9 @@ public class MOPerfTest {
                 }
             }
 
+            for (int j = 0; j < 5; ++j) {
+                LOG.info(String.format("part %d cost: %d (s)", j, timeCost[j] / 1000));
+            }
             LOG.info("All the he execution threads has been prepared,and start running.......");
 
             //启动所有执行线程
