@@ -17,7 +17,9 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 
@@ -30,8 +32,11 @@ public class MOPerfTest {
 
     //private static ExecutorService[] services;
     private static boolean exit_normally = false;
+    
+    private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private static Logger LOG = Logger.getLogger(MOPerfTest.class.getName());
+    
     
     public static void main(String[] args) throws InterruptedException {
         ShutDownHookThread hookThread = new ShutDownHookThread();
@@ -136,7 +141,9 @@ public class MOPerfTest {
                     long t0 = System.currentTimeMillis();
 
                     //获取db连接，每个executor负责一个链接
+                    LOG.info(String.format("Connection[%d] startTime: %s",j,format.format(new Date())));
                     Connection connection = ConnectionOperation.getConnection();
+                    LOG.info(String.format("Connection[%d] endTime: %s",j,format.format(new Date())));
                     if(connection == null){
                         LOG.error(" mo-load can not get invalid connection after trying 3 times, and the program will exit");
                         System.exit(1);
