@@ -109,11 +109,11 @@ public class Sysbench {
             LOG.info(String.format("Now start to initialize sysbench data, db=%s, tableCount=%d, tableSize=%d",db_name,tbl_conut,tbl_size));
             stmt.execute(db_drop_ddl);
             LOG.info(String.format("Succeeded to drop database[%s]",db_name));
-            stmt.execute(synccommit);
+            //stmt.execute(synccommit);
             LOG.info(String.format("Succeeded to sync commit",db_name));
             stmt.execute(db_create_ddl);
             LOG.info(String.format("Succeeded to create database[%s]",db_name));
-            stmt.execute(synccommit);
+            //stmt.execute(synccommit);
             LOG.info(String.format("Succeeded to sync commit",db_name));
             stmt.close();
             con.close();
