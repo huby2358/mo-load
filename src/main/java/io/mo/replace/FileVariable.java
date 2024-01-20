@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
@@ -357,7 +358,7 @@ public class FileVariable implements Variable {
             CharsetDecoder decoder = charset.newDecoder();
             //charBuffer = decoder.decode(buffer);
             charBuffer = charset.decode(buffer);
-            buffer.flip();
+            ((Buffer)buffer).flip();
             return charBuffer.toString();
         } catch (Exception e) {
             e.printStackTrace();
