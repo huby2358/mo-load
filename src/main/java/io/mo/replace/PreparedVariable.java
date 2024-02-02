@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 public class PreparedVariable {
     public static Faker myfaker = new Faker(Locale.CHINA);
@@ -53,6 +54,10 @@ public class PreparedVariable {
         return IdCardNoGenerator.generate();
     }
 
+    public static String getUUID() {
+        return UUID.randomUUID().toString();
+    }
+
     public static String getCellphone() {
         return myfaker.phoneNumber().cellPhone();
     }
@@ -96,6 +101,10 @@ public class PreparedVariable {
 
         if(str.indexOf("$address") != -1){
             str = str.replaceAll("\\$address",getAddress());
+        }
+
+        if(str.indexOf("$uuid") != -1){
+            str = str.replaceAll("\\$uuid",getUUID());
         }
 
         return str;

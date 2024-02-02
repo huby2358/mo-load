@@ -11,6 +11,8 @@ jdbc:
     characterEncoding: "UTF-8"
     useUnicode: "true"
     autoReconnect: "true"
+    initialTimeout: 10
+    maxReconnects: 4
     continueBatchOnError: "false"
     useServerPrepStmts: "true"
     alwaysSendSetIsolation: "false"

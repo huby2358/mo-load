@@ -49,7 +49,7 @@ public class TransBuffer {
 
     public void forward(){
         if(write_time - read_time > scripts.length -1){
-            LOG.debug("The trans buffer is full, do not need to supply.");
+            //LOG.debug("The trans buffer is full, do not need to supply.");
             return;
         }
         SQLScript script = transaction.createNewScript();
