@@ -4,6 +4,7 @@ package io.mo.replace;
 import io.mo.CONFIG;
 import io.mo.MOPerfTest;
 import org.apache.log4j.Logger;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -16,7 +17,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FileVariable implements Variable {
 
@@ -25,7 +32,8 @@ public class FileVariable implements Variable {
     private String name;
     private String path;
     private String[] values;
-    private  int pos = 0;
+    private int pos = 0;
+    //private LinkedBlockingQueue queue = new LinkedBlockingQueue<>();
     private int scope = CONFIG.PARA_SCOPE_TRANSCATION;
     
     private static Logger LOG = Logger.getLogger(MOPerfTest.class.getName());
@@ -59,8 +67,7 @@ public class FileVariable implements Variable {
         return values[index];
     }
 
-    public synchronized void setValue(String value){
-
+    public  void setValue(String value){
         if(pos >= values.length){
             return;
         }
@@ -191,8 +198,9 @@ public class FileVariable implements Variable {
             long start = - System.currentTimeMillis();
             //final File file = new File(path);
             long length = file.length();
-            int defaultThreadNum = 4;//Runtime.getRuntime().availableProcessors();
-
+            //int defaultThreadNum = 4;//Runtime.getRuntime().availableProcessors();
+            int defaultThreadNum = Runtime.getRuntime().availableProcessors();;
+            
             /**
              * 计算每个映射空间的大小
              */
@@ -202,7 +210,7 @@ public class FileVariable implements Variable {
              *计算总共需要多少个映射，每个映射由独立线程操作
              */
             defaultThreadNum = (int)((length + size -1)/size);
-
+            
             /*
              *如果size大于定义的MAX_MAPPING_SIZE，则除最后一个映射外，其他映射的size均为MAX_MAPPING_SIZE
              */
@@ -216,6 +224,10 @@ public class FileVariable implements Variable {
              *考虑到每块映射都有可能丢弃第一行，和最后一行，所以，数组总长度-2*映射线程数
              */
             values = new String[lines - defaultThreadNum*2];
+            LinkedBlockingQueue queue[] = new LinkedBlockingQueue[defaultThreadNum];
+            for(int i = 0 ; i < queue.length; i ++){
+                queue[i] =  new LinkedBlockingQueue();
+            }
 
             final CountDownLatch cdl = new CountDownLatch(defaultThreadNum+1);
             long offset = 0;
@@ -224,7 +236,8 @@ public class FileVariable implements Variable {
 
 
             for (int threadNum = 0;threadNum < defaultThreadNum;threadNum++) {
-
+                
+                final int threadId = threadNum;
                 if (size > remain) {
                     size = remain;
                 }
@@ -237,8 +250,10 @@ public class FileVariable implements Variable {
                         public void run() {
                             MappedByteBuffer mappedByteBuffer = null;
                             try {
-                                LOG.info("freeMemory = " + Runtime.getRuntime().freeMemory() + " offsetF=" + offsetF + " sizeF=" + sizeF);
+                                LOG.debug("freeMemory = " + Runtime.getRuntime().freeMemory() + " offsetF=" + offsetF + " sizeF=" + sizeF);
+                                long start_map = System.currentTimeMillis();
                                 mappedByteBuffer = getMappedByteBuffer(file, MapMode.READ_ONLY, offsetF, sizeF);
+                                
                                 while (null == mappedByteBuffer) {
                                     try {
                                         Thread.sleep(1000);
@@ -249,16 +264,26 @@ public class FileVariable implements Variable {
                                         //e.printStackTrace();
                                     }
                                 }
-                                LOG.info("mappedByteBuffer =" + mappedByteBuffer);
+                                long end_map = System.currentTimeMillis();
+                                LOG.debug("start_map = " + start_map + ", end_map = " + end_map);
+                                LOG.debug("cost[getMappedByteBuffer] = " + ((end_map - start_map)/1000));
+                                LOG.debug("mappedByteBuffer =" + mappedByteBuffer);
                                 //boolean isChangeLineAtLast = atLastIsChangeLine(mappedByteBuffer);
                                 //LOG.info("isChangeLineAtLast = "+isChangeLineAtLast);
+                                
+                                long start_bufferToString = System.currentTimeMillis();
                                 String content = byteBufferToString(mappedByteBuffer);
+                                long end_bufferToString = System.currentTimeMillis();
+                                LOG.debug("start_bufferToString = " + start_bufferToString + ", end_bufferToString = " + end_bufferToString);
+                                LOG.debug("cost[byteBufferToString] = " + ((end_bufferToString - start_bufferToString)/1000));
+                                
                                 LineNumberReader read = new  LineNumberReader(new StringReader(content));
                                 /*
                                  *去掉第一行,以防止第一行不是整行
                                  */
                                 read.readLine();
 
+                                long start_readAndSetValue = System.currentTimeMillis();
                                 String line = read.readLine();
                                 while (null != line) {
                                     String next = read.readLine();
@@ -270,17 +295,21 @@ public class FileVariable implements Variable {
                                         break;
                                     }
 
-                                    setValue(line);
+                                    //setValue(line);
+                                    queue[threadId].add(line);
                                     line = next;
                                     /*
                                      *如果达到最大容量，结束
                                      */
-                                    if(pos >= values.length){
+                                    /*if(pos >= values.length){
                                         cdl.countDown();
                                         break;
-                                    }
+                                    }*/
                                 }
-
+                                long end_readAndSetValue = System.currentTimeMillis();
+                                LOG.debug("start_readAndSetValue = " + start_readAndSetValue + ", end_readAndSetValue = " + end_readAndSetValue);
+                                LOG.debug("cost[readAndSetValue] = " + ((end_readAndSetValue - start_readAndSetValue)/1000) + ",queue["+ threadId + "] = " + queue[threadId].size());
+                                
                             }
                             catch (IOException e) {
                                 e.printStackTrace();
@@ -316,18 +345,31 @@ public class FileVariable implements Variable {
                 public void run()
                 {
                     while(true){
-                        if(pos < values.length)
-                            LOG.info("The "+pos+" variables["+name+"] have been initialiazed");
+                        String value;
+                        if(pos < values.length) {
+                            for(int i = 0; i < queue.length; i++){
+                                if(queue[i].size() == 0)
+                                    continue;
+                                
+                                value = (String) queue[i].peek();
+                                if(value != null) {
+                                    setValue(value);
+                                    if(pos % 10000000 == 0 && pos != 0)
+                                        LOG.info("The " + pos + " variables[" + name + "] have been initialiazed");
+                                }
+                            }
+                        }
                         else{
+                            LOG.info("The " + pos + " variables[" + name + "] have been initialiazed");
                             cdl.countDown();
                             break;
                         }
 
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+//                        try {
+//                            Thread.sleep(5000);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
 
                     }
                 }
