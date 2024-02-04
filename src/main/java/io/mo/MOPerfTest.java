@@ -42,6 +42,12 @@ public class MOPerfTest {
         ShutDownHookThread hookThread = new ShutDownHookThread();
         Runtime.getRuntime().addShutdownHook(hookThread);
 
+        //初始化结果目录
+        initDir();
+
+        //初始化变量
+        initVar();
+
         long excuteTime = RunConfigUtil.getExecDuration()*60*1000;
         int t_num = 0;
 
@@ -103,11 +109,7 @@ public class MOPerfTest {
         
         LOG.info(String.format("The test will last for %d minutes.",excuteTime/1000/60));
         
-        //初始化结果目录
-        initDir();
 
-        //初始化变量
-        initVar();
 
         //初始化
         initTransaction();
