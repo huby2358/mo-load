@@ -53,7 +53,7 @@ public class ResultProcessor extends Thread{
             throw new RuntimeException(e);
         }
 
-        stdout = RunConfigUtil.getStdout();
+        //stdout = RunConfigUtil.getStdout();
     }
 
     public void addResult(ExecResult execResult){

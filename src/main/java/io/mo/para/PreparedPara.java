@@ -98,6 +98,7 @@ public class PreparedPara {
             if(str.indexOf("{"+var.getName()+"}") != -1)
                 str = str.replaceAll("\\{"+var.getName()+"\\}",var.nextValue());
         }
+        str = PreparedVariable.replace(str);
         return str;
     }
 
