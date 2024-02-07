@@ -118,6 +118,8 @@ public class Sysbench {
             stmt.close();
             con.close();
             
+            Thread.sleep(5000);
+            
             for(int i = 1; i < tbl_conut + 1 ; i++) {
                 Connection conLoad = ConnectionOperation.getConnection();
                 conLoad.setCatalog(db_name);
