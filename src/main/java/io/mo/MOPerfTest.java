@@ -143,9 +143,9 @@ public class MOPerfTest {
                     long t0 = System.currentTimeMillis();
 
                     //获取db连接，每个executor负责一个链接
-                    LOG.info(String.format("Connection[%d] startTime: %s",j,format.format(new Date())));
+                    LOG.debug(String.format("Connection[%d] startTime: %s",j,format.format(new Date())));
                     Connection connection = ConnectionOperation.getConnection();
-                    LOG.info(String.format("Connection[%d] endTime: %s",j,format.format(new Date())));
+                    LOG.debug(String.format("Connection[%d] endTime: %s",j,format.format(new Date())));
                     if(connection == null){
                         LOG.error(" mo-load can not get invalid connection after trying 3 times, and the program will exit");
                         System.exit(1);
