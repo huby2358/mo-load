@@ -9,3 +9,6 @@ replace:
 - name: tbx
   type: random
   range: 1,10
+- name: k
+  type: random
+  range: 1,100000

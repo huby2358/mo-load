@@ -319,8 +319,10 @@ public class MOPerfTest {
                         conns.get(i).close();
                     }
                 }
-                if(!exit_normally)
+                if(!exit_normally) {
+                    LOG.info("write total time = "+transBufferProducer.getWrite_total()+",read total time = "+transBufferProducer.getRead_total());
                     resultProcessor.join();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (SQLException e) {

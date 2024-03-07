@@ -7,4 +7,5 @@ transaction:
     prepared: "false"   #是否需要对script的sql进行prepare
     #transaction的sql语句,可多条
     script:
-      - sql: "select k from sbtest{tbx} where id = {id};"
+      #- sql: "select k from sbtest{tbx} where id = {id};"
+      - sql: "select c from sbtest{tbx} where k = {k};"

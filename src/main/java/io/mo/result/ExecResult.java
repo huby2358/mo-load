@@ -26,6 +26,8 @@ public class ExecResult {
     
     private long report_total = 0;
     private long report_account = 0;
+    
+    private long interval_point = 0;
     private long report_start = 0;
     private long report_end = 0;
     private double rt_25th = -1;
@@ -137,18 +139,14 @@ public class ExecResult {
         totalTime.addAndGet(end - start); 
         totalCount.incrementAndGet();
         long time = end - start;
-        
-        report_account++;
-        report_total += time;
-        
 
         if(max_rt < 0)  max_rt = time;
         if(min_rt < 0)  min_rt = time;
 
         if(this.start  == 0) this.start  = start;
-        if(this.report_start  == 0) this.report_start  = start;
+        //if(this.report_start  == 0) this.report_start  = start;
         
-        if(this.report_end  == 0) this.report_end  = end;
+        //if(this.report_end  == 0) this.report_end  = end;
         if(this.end == 0)  this.end = end;
 
         if(max_rt < time)  max_rt = time;
@@ -157,10 +155,21 @@ public class ExecResult {
 
         if(this.start > start)  this.start = start;
 
-        if(this.report_start  > start) this.report_start  = start;
+        //if(this.report_start  > start) this.report_start  = start;
 
         if(this.end < end) this.end = end;
-        if(this.report_end < end) this.report_end = end;
+        //if(this.report_end < end) this.report_end = end;
+        
+        if(this.interval_point <= start){
+            if(this.report_end == 0 || this.report_end < end)  
+                this.report_end = end;
+
+            if(this.report_start  == 0 || this.report_start  > start)
+                this.report_start  = start;
+
+            report_account++;
+            report_total += time;
+        }
        
     }
     
@@ -329,6 +338,7 @@ public class ExecResult {
 
     public synchronized void reset(){
         this.report_start = 0;
+        this.interval_point = System.currentTimeMillis();
         this.report_end = 0;
         this.report_total = 0;
         this.report_account = 0;
