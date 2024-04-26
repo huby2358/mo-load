@@ -38,4 +38,6 @@ public class CONFIG {
     public static boolean SHUTDOWN_SYSTEMOUT = false;
     
     public static int REPORT_INTERVAL = 10000;
+    
+    public static boolean SHORT_CONN_MODE = false;
 }

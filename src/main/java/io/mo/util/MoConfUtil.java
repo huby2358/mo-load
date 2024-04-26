@@ -15,6 +15,7 @@ public class MoConfUtil {
     public static void init(){
         try {
             conf = mo_conf.getInfo("mo.yml");
+            getConnectionMode();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -76,7 +77,6 @@ public class MoConfUtil {
     }
 
     public static String getDefaultDatabase(){
-        
         if(CONFIG.SPEC_DATABASE != null)
             return CONFIG.SPEC_DATABASE;
         
@@ -86,7 +86,17 @@ public class MoConfUtil {
         Map database = (Map)jdbc.get("database");
         return database.get("default").toString();
     }
+    
+    public static String getConnectionMode(){
+        if(conf == null) init();
 
+        Map jdbc = (Map)conf.get("jdbc");
+        String connMode = (String)jdbc.get("con_mode");
+        if(connMode.equalsIgnoreCase("short")){
+            CONFIG.SHORT_CONN_MODE = true;
+        }
+        return connMode;
+    }
 
 
     public static void main(String[] args){

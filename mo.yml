@@ -23,6 +23,7 @@ jdbc:
     socketTimeout: 100000
     useSSL: "false"
     #enabledTLSProtocols : "TLSv1.2"
+  con_mode: "long"
 #users
 user:
   name: "dump"

@@ -117,6 +117,8 @@ public class TransExecutor implements Runnable {
                         //将执行时间和结果保存在临时缓冲区里
                         //rtBuffer.setValue(transName + "=" + beginTime + ":" + endTime);
                         rtBuffer.setValue(beginTime,endTime);
+                        if(CONFIG.SHORT_CONN_MODE)
+                            reconnect();
                     } catch (SQLException e) {
                         ErrorMessage errorMessage = new ErrorMessage();
                         errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
@@ -250,6 +252,8 @@ public class TransExecutor implements Runnable {
                         //将执行时间和结果保存在临时缓冲区里
                         //rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
                         rtBuffer.setValue(beginTime,endTime);
+                        if(CONFIG.SHORT_CONN_MODE)
+                            reconnect();
                     } catch (SQLException e) {
 
                         ErrorMessage errorMessage = new ErrorMessage();
@@ -359,6 +363,28 @@ public class TransExecutor implements Runnable {
         running = false;
         rtBuffer.setValid(false);
         LOG.debug(String.format("Thread[id=%d] has been stoped.",id));
+    }
+    
+    public void reconnect(){
+        try {
+            if(!connection.isClosed()){
+                connection.close();
+            }
+            connection = ConnectionOperation.getConnection();
+            if(connection == null){
+                running = false;
+                rtBuffer.setValid(false);
+                LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit",id));
+            }
+            statement = connection.createStatement();
+            
+            if(transaction.getMode() == CONFIG.DB_TRANSACTION_MODE) {
+                connection.setAutoCommit(false);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
     }
     
     public static void main(String[] args){
