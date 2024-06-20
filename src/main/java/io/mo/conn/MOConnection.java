@@ -36,13 +36,21 @@ public class MOConnection implements DatabaseConnection {
 
         if(CONFIG.SPEC_PASSWORD != null)
             password = CONFIG.SPEC_PASSWORD;
-        try {
-            Connection connection = DriverManager.getConnection(conn,username,password);
-            return connection;
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            LOG.error(String.format("Connection Info : username=%s,password=%s,jdbcURL=%s",username,password,conn));
+        for(int i = 0 ; i < 3; i++) {
+            try {
+                Connection connection = DriverManager.getConnection(conn, username, password);
+                return connection;
+            } catch (SQLException e) {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                LOG.error(e.getMessage());
+                LOG.error(String.format("Connection Info : username=%s,password=%s,jdbcURL=%s", username, password, conn));
+            }
         }
+        
         
         return null;
     }
