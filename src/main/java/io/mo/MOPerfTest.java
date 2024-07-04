@@ -92,7 +92,7 @@ public class MOPerfTest {
             }
             
             if(cmd.hasOption("d"))
-                excuteTime = Integer.parseInt(cmd.getOptionValue('d'))*60*1000;
+                excuteTime = Long.parseLong(cmd.getOptionValue('d'))*60*1000;
 
             if(cmd.hasOption("t"))
                 t_num = Integer.parseInt(cmd.getOptionValue('t'));
@@ -106,7 +106,6 @@ public class MOPerfTest {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-        
         LOG.info(String.format("The test will last for %d minutes.",excuteTime/1000/60));
         
 
