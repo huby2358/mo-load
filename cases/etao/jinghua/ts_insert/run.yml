@@ -15,7 +15,9 @@ transaction:
   #from: "2020-01-01 00:00:01"
   #表名称
   table_name: "etao.t_device"
-  #表示时序数据数据中的设备标识，如果为多个字段，中间用","分割
+  #表示时序数据数据中的设备标识，
+  #如果为多个字段，且 method 为 insert,中间用","分割
+  #如果为多个字段，且 method 为 load,中间用field_separator分割，默认为|
   #可以使用变量，但是必须为random,enum这两种类型，为其他类型会报错
   #如果存在变量，device的最终数量为所有变量的size的乘积
   device: "'{dtype}','{\"LINE\":\"LINE-{lidx}\",\"PANEL\":\"PANEL-{pidx}\",\"CODE\":\"CODE-{cidx}\"}','{metric_name}'"

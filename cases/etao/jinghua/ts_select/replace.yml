@@ -11,7 +11,7 @@ replace:
   value: CPU,BORAD,SLOT
 - name: lidx
   type: random
-  range: 1,30
+  range: 1,1
 - name: pidx
   type: random
-  range: 1,100
+  range: 1,1

@@ -289,6 +289,15 @@ public class TSSQLScript extends SQLScript {
 
     public void setMethod(String method) {
         this.method = method;
+        if(this.method.equalsIgnoreCase(CONFIG.TS_DEFAULT_LOAD_METHOD)){
+            if(this.field_separator.equalsIgnoreCase("|")) {
+                
+                metric_types = org_metrics.split("\\|");
+            }
+            else
+                metric_types = org_metrics.split(this.field_separator);
+            metric_count = metric_types.length;
+        }
     }
 
     public String getOrg_devices() {
@@ -345,10 +354,10 @@ public class TSSQLScript extends SQLScript {
             System.out.println(script1.getCommand(i));
         }
 
-        SQLScript script2 = script.createNewScript();
-        for(int i = 0; i < script1.length(); i++) {
-            System.out.println(script2.getCommand(i));
-        }
+//        SQLScript script2 = script.createNewScript();
+//        for(int i = 0; i < script1.length(); i++) {
+//            System.out.println(script2.getCommand(i));
+//        }
         TSSQLScript tssqlScript = new TSSQLScript("null","null","null",20000);
         System.out.println(tssqlScript.gongbei(900000,20000));
         //System.exit(1);

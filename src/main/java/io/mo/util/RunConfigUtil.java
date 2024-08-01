@@ -157,7 +157,7 @@ public class RunConfigUtil {
                         tsScript.setMethod(method);
 
                         if(field_separator == null){
-                            LOG.error(String.format("The para[field_separator] in transaction[%s] is null, using default value[|]",trans.getName()));
+                            LOG.warn(String.format("The para[field_separator] in transaction[%s] is null, using default value[|]",trans.getName()));
                         }else
                             tsScript.setField_separator(field_separator);
                         
