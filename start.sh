@@ -207,3 +207,4 @@ if [ "${METHOD}" = "SYSBENCH" ]; then
 else 
   start
 fi
+

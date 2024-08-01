@@ -1,0 +1,25 @@
+duration: 1 #所有transaction的执行时间，单位分钟
+transaction:
+- name: "etao-jh-load"  #transaction名称
+  #type="ts",表示该事务为时序数据的load性能测试
+  type: "ts"
+  #执行该transaction测试的并发量
+  vuser: 30
+  #每条语句中的row的数量
+  batch_size: 10000
+  #采用的load 方式
+  #insert: 表示采用insert into values(),()...方式
+  #load: 表示采用load data inline(),(),()方式
+  method: "load"
+  #表示时序数据的起始时间，不设置表示从当前时间开始
+  #from: "2020-01-01 00:00:01"
+  #表名称
+  table_name: "etao.t_device"
+  #表示时序数据数据中的设备标识，如果为多个字段，中间用","分割
+  #可以使用变量，但是必须为random,enum这两种类型，为其他类型会报错
+  #如果存在变量，device的最终数量为所有变量的size的乘积
+  device: "{dtype}|{\"LINE\":\"LINE-{lidx}\",\"PANEL\":\"PANEL-{pidx}\",\"CODE\":\"CODE-{cidx}\"}|{metric_name}"
+  #表示时序数据数据中的指标值类型，支持int和float，如果为多个字段，中间用","分割
+  metric: float
+
+ 

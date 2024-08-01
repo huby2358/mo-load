@@ -1,0 +1,12 @@
+duration: 10 #所有transaction的执行时间，单位分钟
+stdout: "console"
+transaction:
+- name: "insert_with_all_index_1000w_prepare"
+  vuser: 10  
+  mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
+  prepared: "true"   #是否需要对script的sql进行prepare
+  sucrate: 1   #成功率，即如果成功率达不到该值，该事务测试失败，默认为1
+  script:
+  - sql: "insert into index_perf(k1,k2,cck1,cck2,uk,cuk1,cuk2,c,pad) values(?,?,?,?,?,?,?,'67847967377-48000963322-62604785301-91415491898-96926520291','67847967377-48000963322-62604785301-91415491898-96926520291');"
+    paras: INT({k1}),STR({k1}),STR({k1}),STR({k1}),STR({k1}),STR({k1}),STR({k1})
+

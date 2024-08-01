@@ -5,9 +5,15 @@ import io.mo.replace.Variable;
 
 public class SQLScript {
     private int pos = 0;
+    private int batch_size = 1;
     private String[] commands;
     
     private PreparedSQLCommand[] preparedSQLCommands;
+    
+    public SQLScript(){
+        
+    }
+    
 
     public SQLScript(int length){
         commands = new String[length];
@@ -56,6 +62,18 @@ public class SQLScript {
 
     public int length(){
         return commands.length;
+    }
+    
+    protected void setLength(int length){
+        commands = new String[length];
+    }
+
+    public int getBatchSize() {
+        return this.batch_size;
+    }
+
+    public void setBatchSize(int batch_size) {
+        this.batch_size = batch_size;
     }
 
     public static void main(String[] args){

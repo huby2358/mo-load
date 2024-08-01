@@ -1,0 +1,11 @@
+duration: 10 #所有transaction的执行时间，单位分钟
+stdout: "console"
+transaction:
+- name: "select_wms_material_sn_all"
+  vuser: 10  
+  mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
+  prepared: "false"   #是否需要对script的sql进行prepare
+  sucrate: 1   #成功率，即如果成功率达不到该值，该事务测试失败，默认为1
+  script:
+  - sql: "select * from t_wms_material_sn a where a.stock_num > 0 and a.expired_status = 0 and a.lock_status = 0 and a.forbid_status = 0 and a.scrap_status = 0 and a.is_deleted = 0 and a.light_status = 0 and a.tenant_id = '{tenant_id}' and a.warehouse_code = '{warehouse_code}' and a.area_code = '{warehouse_code}-{area_code}' and a.material_code = '{material_code}' and a.area_code is not null and a.area_code in (select code from t_basic_warehouse_area where shelf_type = 'SMART_SHELF' and tenant_id = '{tenant_id}' and is_deleted = 0) and a.bill_no is null order by (a.stock_num - a.init_num) asc ,a.produce_time asc,a.in_time asc limit 100;"
+

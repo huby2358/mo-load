@@ -1,0 +1,8 @@
+replace:
+- name: cck1
+  type: file
+  path: replace/index_perf_1000w_cck1.txt
+  
+- name: cck2
+  type: random
+  range: 1,10

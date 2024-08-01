@@ -1,0 +1,17 @@
+replace:
+- name: starttime
+  type: dbrs
+  sql: "select create_time from etao.t_device limit 1000;"
+  refresh: 5
+- name: metric_name
+  type: enum
+  value: LENGTH,HEIGHT,WIDTH,HUMIDITY,TEMPERATURE 
+- name: dtype
+  type: enum
+  value: CPU,BORAD,SLOT
+- name: lidx
+  type: random
+  range: 1,30
+- name: pidx
+  type: random
+  range: 1,100

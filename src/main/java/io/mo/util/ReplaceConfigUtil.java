@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class ReplaceConfigUtil {
     private static YamlUtil replace = new YamlUtil();
-    public static List vars = new ArrayList<FileVariable>();
+    public static List<Variable> vars = new ArrayList<>();
     private static Logger LOG = Logger.getLogger(MOPerfTest.class.getName());
 
     static {
@@ -46,6 +46,50 @@ public class ReplaceConfigUtil {
                         int scope = Integer.parseInt(var.get("scope").toString());
                         ran.setScope(scope);
                     }
+                    vars.add(ran);
+                }
+
+                if(var.get("type").equals(CustomizedReplaceType.RBIGNIT)){
+                    RandomBigintVariable ran = new RandomBigintVariable(var.get("name").toString(),var.get("range").toString());
+                    if(var.get("scope") != null){
+                        int scope = Integer.parseInt(var.get("scope").toString());
+                        ran.setScope(scope);
+                    }
+                    vars.add(ran);
+                }
+
+                if(var.get("type").equals(CustomizedReplaceType.ENUM)){
+                    EnumVariable ran = new EnumVariable(var.get("name").toString(),var.get("value").toString());
+                    if(var.get("scope") != null){
+                        int scope = Integer.parseInt(var.get("scope").toString());
+                        ran.setScope(scope);
+                    }
+                    vars.add(ran);
+                }
+
+                if(var.get("type").equals(CustomizedReplaceType.DBRS)){
+                    
+                    String name = (String) var.get("name");
+                    String sql = (String) var.get("sql");
+                    if(sql == null || sql.equalsIgnoreCase("")){
+                        LOG.error(String.format("Parameter[sql] can not be null in variable[%s], please check...",name));
+                        System.exit(1);
+                    }
+
+                    DBResultSetVariable ran = new DBResultSetVariable(name,sql);
+
+
+                    if(var.get("refresh") != null){
+                        int refresh = Integer.parseInt(var.get("refresh").toString());
+                        ran.setRefresh(refresh);
+                    }
+                    
+                    if(var.get("scope") != null){
+                        int scope = Integer.parseInt(var.get("scope").toString());
+                        ran.setScope(scope);
+                    }
+                    
+                    ran.init();
                     vars.add(ran);
                 }
 

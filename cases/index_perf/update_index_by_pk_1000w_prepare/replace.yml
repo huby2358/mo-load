@@ -1,0 +1,7 @@
+replace:
+- name: k1
+  type: random
+  range: 0,10000000
+- name: id
+  type: random
+  range: 0,10000000

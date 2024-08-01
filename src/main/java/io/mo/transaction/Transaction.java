@@ -2,12 +2,16 @@ package io.mo.transaction;
 
 import io.mo.para.PreparedPara;
 import io.mo.thread.PreparedParaProducer;
+import io.mo.transaction.ts.TSSQLScript;
+import io.mo.util.ReplaceConfigUtil;
 
 import java.util.ArrayList;
 
 public class Transaction {
     private String name;
     private int theadnum;
+    
+    private String type = "common";
 
     private int mode = 0;
 
@@ -16,6 +20,9 @@ public class Transaction {
     
 
     private double sucrate = 1.0;
+    
+    private int waitTime = 0;
+    private int interval = 0;
 
     private ArrayList<Integer> acceptErrorCodes = new ArrayList<>();
 
@@ -66,14 +73,24 @@ public class Transaction {
     }
 
     public SQLScript createNewScript(){
+        if( this.script instanceof TSSQLScript){
+            return ((TSSQLScript) this.script).createNewScript();
+        }
+        
         SQLScript script = new SQLScript(this.script.length());
         for(int i = 0;i < script.length();i++){
             script.addCommand(this.script.getCommand(i));
         }
+        ReplaceConfigUtil.replace(script);
         return script;
     }
 
     public void setScript(SQLScript script) {
+//        if(script instanceof TSSQLScript) {
+//            this.script = ((TSSQLScript) script).createNewScript();
+//            return;
+//        }
+        
         this.script = script;
     }
 
@@ -168,6 +185,29 @@ public class Transaction {
         return false;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getWaitTime() {
+        return waitTime;
+    }
+
+    public void setWaitTime(int waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    public int getInterval() {
+        return interval;
+    }
+
+    public void setInterval(int interval) {
+        this.interval = interval;
+    }
 
     public static void main(String[] args){
         int i = 0;

@@ -1,0 +1,44 @@
+replace:
+- name: starttime
+  type: dbrs
+  sql: "select date_sub(max(create_time),INTERVAL 2 MINUTE) from etao.t_device;"
+  refresh: 5
+- name: tbx
+  type: random
+  range: 1,10
+  scope: 1
+  
+- name: dtype
+  type: enum
+  value: CPU,BORAD,SLOT
+
+- name: lidx
+  type: random
+  range: 1,30
+  
+- name: pidx
+  type: random
+  range: 1,100
+
+- name: cidx
+  type: random
+  range: 1,10
+  
+- name: metric_name
+  type: enum
+  value: LENGTH,HEIGHT,WIDTH,HUMIDITY,TEMPERATURE
+    
+- name: metric_value_p1
+  type: random
+  range: 1,100
+  
+- name: metric_value_p2
+  type: random
+  range: 1,100
+  
+
+  
+#- name: name
+#  type: file
+#  path: replace/name.txt
+  

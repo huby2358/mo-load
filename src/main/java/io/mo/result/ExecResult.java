@@ -19,6 +19,10 @@ import org.checkerframework.checker.units.qual.A;
 
 public class ExecResult {
     private String name;
+    
+    private String type = CONFIG.TXN_TYPE_COMMON;
+    
+    private int batch_size  = 1;
 
     private long max_rt = -1;
     private long avg_rt = 0;
@@ -51,6 +55,10 @@ public class ExecResult {
     private int tps = 0;
 
     private int qps = 0;
+    
+    private int bps = 0;
+    
+    private int rps = 0;
 
     private long start = 0;
 
@@ -124,6 +132,28 @@ public class ExecResult {
         this.startTime = dateFormat.format(now);
         
         this.vuser = vuser;
+    }
+    
+    public ExecResult(String name,int queryCount, int vuser, int batch_size, String type){
+        this.name = name;
+        this.queryCount = queryCount;
+        File res_dir = new File("report/"+CONFIG.EXECUTENAME+"/");
+        if(!res_dir.exists())
+            res_dir.mkdirs();
+        try {
+            error_writer = new FileWriter("report/" + CONFIG.EXECUTENAME +"/error/" + name + ".err");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        this.startTime = dateFormat.format(now);
+
+        this.vuser = vuser;
+        this.batch_size = batch_size;
+        this.type = type;
+        
     }
 
     public synchronized void setTime(String time){
@@ -322,8 +352,6 @@ public class ExecResult {
         return qps;
     }
     
-    
-
     public void setTps(int tps) {
         this.tps = tps;
     }
@@ -346,6 +374,15 @@ public class ExecResult {
 
     public void setQps(int qps) {
         this.qps = qps;
+    }
+    
+    public int getRps(){
+        if(this.end == 0)
+            return 0;
+        //this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
+        this.tps = (int)((totalCount.longValue()*1000/(this.end-this.start)));
+        this.rps= this.tps * queryCount*batch_size;
+        return rps;
     }
     
     public void flushErrors(){
@@ -406,6 +443,14 @@ public class ExecResult {
 
     public void setExpRate(double expRate) {
         this.expRate = expRate;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public static void main(String[] args){

@@ -1,0 +1,9 @@
+replace:
+- name: k2_prefix
+  type: file
+  path: replace/index_perf_1000w_k2_prefix.txt
+  
+- name: uk_prefix
+  type: random
+  range: 300000,400000
+

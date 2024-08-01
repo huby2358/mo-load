@@ -2,6 +2,7 @@ package io.mo.transaction;
 
 import io.mo.CONFIG;
 import io.mo.thread.TransBufferProducer;
+import io.mo.transaction.ts.TSSQLScript;
 import io.mo.util.ReplaceConfigUtil;
 import org.apache.log4j.Logger;
 
@@ -29,6 +30,18 @@ public class TransBuffer {
     
     public TransBuffer(Transaction transaction){
         this.transaction = transaction;
+        
+        if(this.transaction.getType().equalsIgnoreCase(CONFIG.TXN_TYPE_TS)){
+            TSSQLScript script = (TSSQLScript) this.transaction.getScript();
+            int batch_size = script.getBatchSize();
+            int buffer_size = script.getBuffer_size();
+            buffer_size = buffer_size > batch_size?buffer_size:batch_size;
+            if(buffer_size*CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD > 1000000){
+                int size = 1000000/buffer_size + 1;
+                scripts = new SQLScript[size];
+            }
+        }
+        
     }
 
     public void addScript(SQLScript script){
@@ -53,7 +66,7 @@ public class TransBuffer {
             return;
         }
         SQLScript script = transaction.createNewScript();
-        ReplaceConfigUtil.replace(script);
+        //ReplaceConfigUtil.replace(script);
         addScript(script);
     }
 
@@ -78,7 +91,7 @@ public class TransBuffer {
         write_pos = 0;
         for(int i = 0; i < scripts.length;i++){
             SQLScript script = transaction.createNewScript();
-            ReplaceConfigUtil.replace(script);
+            //ReplaceConfigUtil.replace(script);
             scripts[i] = script;
             write_pos++;
             write_time++;
@@ -124,6 +137,10 @@ public class TransBuffer {
 
     public void setWrite_time(long write_time) {
         this.write_time = write_time;
+    }
+    
+    public int size(){
+        return scripts.length;
     }
 
 }

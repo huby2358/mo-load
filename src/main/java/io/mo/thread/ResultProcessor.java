@@ -223,22 +223,15 @@ public class ResultProcessor extends Thread{
         if(execResult.getTotalCount() <= 5) return null;
         
         String name = formatName(execResult.getName());
-
- //       String TRANSNAME = cell_blk_name.substring(0,2)+name+ cell_blk_name.substring(2+name.length(), cell_blk_name.length());
-//        String RT_MAX    = cell_blk.substring(0,3)+execResult.getMax_rt()+ cell_blk.substring(3+String.valueOf(execResult.getMax_rt()).length(), cell_blk.length());
-//        String RT_MIN    = cell_blk.substring(0,3)+execResult.getMin_rt()+ cell_blk.substring(3+String.valueOf(execResult.getMin_rt()).length(), cell_blk.length());
-//        String RT_AVG    = cell_blk.substring(0,3)+execResult.getAvg_rt()+ cell_blk.substring(3+String.valueOf(execResult.getAvg_rt()).length(), cell_blk.length());
-//        String TPS       = cell_blk.substring(0,4)+execResult.getTps()+ cell_blk.substring(4+String.valueOf(execResult.getTps()).length(), cell_blk.length());
-//        String QPS       = cell_blk.substring(0,4)+execResult.getQps()+ cell_blk.substring(4+String.valueOf(execResult.getQps()).length(), cell_blk.length());
-//        String SUCCESS     = cell_blk.substring(0,2)+execResult.getTotalCount()+ cell_blk.substring(2+String.valueOf(execResult.getTotalCount()).length(), cell_blk.length());
-//        String ERROR     = cell_blk.substring(0,3)+execResult.getErrorCount()+ cell_blk.substring(3+String.valueOf(execResult.getErrorCount()).length(), cell_blk.length());
-//        long beginTime = System.currentTimeMillis();
-//        execResult.computePercentile();
-//        long endTime = System.currentTimeMillis();
-//        LOG.debug("Computing percentile costs : " + (endTime - beginTime));
-        return String.format("%s: tps=%d,qps=%d,suc=%d,err=%d,rt_max=%d,rt_min=%d,rt_avg=%.2f",//rt_25th=%.2f,rt_75=%.2f,rt_90=%.2f,rt_99=%.2f",
+        
+        if(execResult.getType().equalsIgnoreCase(CONFIG.TXN_TYPE_COMMON))
+            return String.format("%s: tps=%d,qps=%d,suc=%d,err=%d,rt_max=%d,rt_min=%d,rt_avg=%.2f",//rt_25th=%.2f,rt_75=%.2f,rt_90=%.2f,rt_99=%.2f",
                 name, execResult.getTps(), execResult.getQps(), execResult.getTotalCount(), execResult.getErrorCount(),
                 execResult.getMax_rt(),execResult.getMin_rt(),execResult.getAvg_rt());
+        else
+            return String.format("%s: b/s=%d,r/s=%d,suc=%d,err=%d,rt_max=%d,rt_min=%d,rt_avg=%.2f",//rt_25th=%.2f,rt_75=%.2f,rt_90=%.2f,rt_99=%.2f",
+                    name, execResult.getTotalTps(), execResult.getRps(), execResult.getTotalCount(), execResult.getErrorCount(),
+                    execResult.getMax_rt(),execResult.getMin_rt(),execResult.getAvg_rt());
                 //execResult.getP25_rt(), execResult.getP75_rt(), execResult.getP90_rt(), execResult.getP99_rt());
     }
 
@@ -292,23 +285,50 @@ public class ResultProcessor extends Thread{
             summary.append("START : " + execResult.getStartTime()+"\n");
             summary.append("END : " + execResult.getEndTime()+"\n");
             summary.append("VUSER : " + execResult.getVuser()+"\n");
-            summary.append("TPS : " + execResult.getTotalTps()+"\n");
-            summary.append("QPS : " + execResult.getTotalQps()+"\n");
+            if(execResult.getType().equalsIgnoreCase(CONFIG.TXN_TYPE_COMMON)){
+                summary.append("TPS : " + execResult.getTotalTps()+"\n");
+                summary.append("QPS : " + execResult.getTotalQps()+"\n");
+            }else {
+                summary.append("B/S : " + execResult.getTotalTps()+"\n");
+                summary.append("R/S : " + execResult.getRps()+"\n");
+            }
             summary.append("SUCCESS : " + execResult.getTotalCount()+"\n");
             summary.append("ERROR : " + execResult.getErrorCount()+"\n");
             summary.append("RT_MAX : " + execResult.getMax_rt()+"\n");
             summary.append("RT_MIN : " + execResult.getMin_rt()+"\n");
             summary.append("RT_AVG : " + String.format("%.2f",execResult.getTotalAvg_rt())+"\n");
-//            summary.append("RT_25TH : " + execResult.getP25_rt()+"\n");
-//            summary.append("RT_75TH : " + execResult.getP75_rt()+"\n");
-//            summary.append("RT_90TH : " + execResult.getP90_rt()+"\n");
-//            summary.append("RT_99TH : " + execResult.getP99_rt()+"\n");
             summary.append("SUC_RATE : " + execResult.getSucRate()+"\n");
             summary.append("EXP_RATE : " + execResult.getExpRate()+"\n");
             summary.append("RESULT : " + (execResult.getSucRate() >= execResult.getExpRate() ? "SUCCEED" : "FAILED") + "\n");
             summary.append("\n");
             result = (execResult.getSucRate() >= execResult.getExpRate()) ? true : false;
             
+        }
+        return summary.toString();
+    }
+
+    public String getTSSummary(){
+        summary.delete(0,summary.length());
+        for(int i = 0;i < results.size();i++){
+            ExecResult execResult = results.get(i);
+            //execResult.computePercentile();
+            summary.append("["+execResult.getName()+"]\n");
+            summary.append("START : " + execResult.getStartTime()+"\n");
+            summary.append("END : " + execResult.getEndTime()+"\n");
+            summary.append("VUSER : " + execResult.getVuser()+"\n");
+            summary.append("B/S : " + execResult.getTotalTps()+"\n");
+            summary.append("R/S : " + execResult.getRps()+"\n");
+            summary.append("SUCCESS : " + execResult.getTotalCount()+"\n");
+            summary.append("ERROR : " + execResult.getErrorCount()+"\n");
+            summary.append("RT_MAX : " + execResult.getMax_rt()+"\n");
+            summary.append("RT_MIN : " + execResult.getMin_rt()+"\n");
+            summary.append("RT_AVG : " + String.format("%.2f",execResult.getTotalAvg_rt())+"\n");
+            summary.append("SUC_RATE : " + execResult.getSucRate()+"\n");
+            summary.append("EXP_RATE : " + execResult.getExpRate()+"\n");
+            summary.append("RESULT : " + (execResult.getSucRate() >= execResult.getExpRate() ? "SUCCEED" : "FAILED") + "\n");
+            summary.append("\n");
+            result = (execResult.getSucRate() >= execResult.getExpRate()) ? true : false;
+
         }
         return summary.toString();
     }

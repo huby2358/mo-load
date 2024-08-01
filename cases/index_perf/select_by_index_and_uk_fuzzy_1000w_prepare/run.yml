@@ -1,0 +1,12 @@
+duration: 10 #所有transaction的执行时间，单位分钟
+stdout: "console"
+transaction:
+- name: "select_by_index_and_uk_fuzzy_1000w_prepare"
+  vuser: 10  
+  mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
+  prepared: "true"   #是否需要对script的sql进行prepare
+  sucrate: 1   #成功率，即如果成功率达不到该值，该事务测试失败，默认为1
+  script:
+  - sql: "select c,pad from index_perf where k2 like ? and uk like ?;"
+    paras: STR({k2_prefix}),STR({uk_prefix})
+

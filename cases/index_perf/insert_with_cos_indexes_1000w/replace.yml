@@ -1,0 +1,5 @@
+replace:
+- name: k1
+  type: random
+  range: 10000000,20000000
+

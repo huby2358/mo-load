@@ -1,0 +1,10 @@
+replace:
+- name: tenant_id
+  type: random
+  range: 100,200
+- name: warehouse_code
+  type: file
+  path: replace/etao/warehouse_code.txt
+- name: area_code
+  type: random
+  range: 1,5

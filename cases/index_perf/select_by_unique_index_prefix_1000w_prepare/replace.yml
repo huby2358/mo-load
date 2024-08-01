@@ -1,0 +1,4 @@
+replace:
+- name: uk_prefix
+  type: file
+  path: replace/index_perf_1000w_uk_prefix_prepare.txt

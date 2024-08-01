@@ -1,0 +1,10 @@
+replace:
+- name: cck1
+  type: random
+  range: 100000,200000
+- name: cck2
+  type: random
+  range: 1,10
+- name: id
+  type: random
+  range: 0,10000000

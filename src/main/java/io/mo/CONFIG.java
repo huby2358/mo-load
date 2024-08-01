@@ -40,4 +40,12 @@ public class CONFIG {
     public static int REPORT_INTERVAL = 10000;
     
     public static boolean SHORT_CONN_MODE = false;
+    
+    public static int TS_DEFAULT_BATCH_SIZE = 10000;
+    public static String TS_DEFAULT_LOAD_METHOD = "load";
+    public static String TS_DEFAULT_TABLE_NAME = "device";
+    
+    public static final String TXN_TYPE_COMMON = "common";
+    public static final String TXN_TYPE_TS = "ts";
+    
 }

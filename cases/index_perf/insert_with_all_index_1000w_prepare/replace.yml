@@ -1,0 +1,11 @@
+replace:
+- name: k1
+  type: random
+  range: 10000000,20000000
+- name: uck1
+  type: random
+  range: 10000000,20000000
+- name: uck2
+  type: random
+  range: 20000000,30000000
+

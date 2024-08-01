@@ -60,7 +60,7 @@ public class TransBufferProducer extends Thread {
 
     public int getWrite_total(){
         for (int i = 0 ; i < buffers.size(); i++){
-            write_total += buffers.get(i).getWrite_time()- CONFIG.DEFAULT_SIZE_SEND_BUFFER_PER_THREAD;
+            write_total += buffers.get(i).getWrite_time()- buffers.get(i).size();
         }
         return write_total;
     }

@@ -1,0 +1,10 @@
+#stdout=console, 过程数据输出到控制台和文件
+duration: 10 #所有transaction的执行时间，单位分钟
+transaction:
+  - name: "etao-jh-select"  #transaction名称
+    vuser: 10   #执行该transaction测试的并发量
+    mode: 0 #执行模式，值为0表示script的中sql直接顺序执行，值为1表示把script的sql封装成一个数据库事务进行执行
+    prepared: "false"   #是否需要对script的sql进行prepare
+    #transaction的sql语句,可多条
+    script:
+      - sql: "select avg(metric_value) from t_device where create_time between '{starttime}' and date_add('{starttime}',INTERVAL 1 MINUTE) and metric_name='{metric_name}' and device_type='{dtype}' and  json_extract(tag,'$.LINE','$.PANEL') = '[\"LINE-{lidx}\",\"PANEL-{pidx}\"]';"

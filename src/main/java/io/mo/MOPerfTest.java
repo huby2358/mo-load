@@ -9,6 +9,7 @@ import io.mo.transaction.PreparedSQLCommand;
 import io.mo.transaction.SQLScript;
 import io.mo.transaction.TransBuffer;
 import io.mo.transaction.Transaction;
+import io.mo.transaction.ts.TSSQLScript;
 import io.mo.util.ReplaceConfigUtil;
 import io.mo.util.RunConfigUtil;
 import org.apache.commons.cli.*;
@@ -108,25 +109,25 @@ public class MOPerfTest {
         }
         LOG.info(String.format("The test will last for %d minutes.",excuteTime/1000/60));
         
-
-        
         //初始化
         initTransaction();
 
         LOG.info("Initializing the execution threads,please wait for serval minutes.");
         for(int i = 0; i < transactions.length; i++){
+            int t_num_t = 0;
             if(t_num == 0)
-                t_num = transactions[i].getTheadnum();
+                t_num_t = transactions[i].getTheadnum();
             else {
-                transactions[i].setTheadnum(t_num);
-                execResult[i].setVuser(t_num);
+                t_num_t = t_num;
+                transactions[i].setTheadnum(t_num_t);
+                execResult[i].setVuser(t_num_t);
             }
             
-            LOG.info(String.format("transaction[%s].tnum = %d", transactions[i].getName(),t_num));
-            TransExecutor[] executors = new TransExecutor[t_num];
+            LOG.info(String.format("transaction[%s].tnum = %d", transactions[i].getName(),t_num_t));
+            TransExecutor[] executors = new TransExecutor[t_num_t];
 
             //定义线程初始化计数器
-            CyclicBarrier barrier = new CyclicBarrier(t_num, new Runnable() {
+            CyclicBarrier barrier = new CyclicBarrier(t_num_t, new Runnable() {
                 @Override
                 public void run() {
                     LOG.info("All the he execution threads has been prepared and started running, pleas wait.....");
@@ -136,8 +137,8 @@ public class MOPerfTest {
             });
 
             long[] timeCost = new long[5];
-            Thread[] thread = new Thread[t_num];
-            for(int j = 0;j < t_num;j++){
+            Thread[] thread = new Thread[t_num_t];
+            for(int j = 0;j < t_num_t;j++){
                 try {
                     long t0 = System.currentTimeMillis();
 
@@ -149,7 +150,7 @@ public class MOPerfTest {
                         LOG.error(" mo-load can not get invalid connection after trying 3 times, and the program will exit");
                         System.exit(1);
                     }
-                    hookThread.addConnection(connection);
+                    //hookThread.addConnection(connection);
 
                     long t1 = System.currentTimeMillis();
                     timeCost[0] += t1 - t0;
@@ -157,7 +158,9 @@ public class MOPerfTest {
                     //初始化发送缓冲区，每个executor拥有一个发送缓冲区
                     TransBuffer buffer = new TransBuffer(transactions[i]);
                     executors[j] = new TransExecutor(j,connection,buffer,execResult[i],barrier);
-
+                    
+                    hookThread.addExecutor(executors[j]);
+                    
                     long t2 = System.currentTimeMillis();
                     timeCost[1] += t2 - t1;
 
@@ -293,38 +296,44 @@ public class MOPerfTest {
 
         for (int i = 0; i < transCount; i++) {
             transactions[i] = RunConfigUtil.getTransaction(i);
-            execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length(),transactions[i].getTheadnum());
+            if(transactions[i].getType().equalsIgnoreCase(CONFIG.TXN_TYPE_COMMON))
+                execResult[i] = new ExecResult(transactions[i].getName(),transactions[i].getScript().length(),transactions[i].getTheadnum());
+            if(transactions[i].getType().equalsIgnoreCase(CONFIG.TXN_TYPE_TS)) {
+                execResult[i] = new ExecResult(transactions[i].getName(), 1, transactions[i].getTheadnum(), transactions[i].getScript().getBatchSize(),CONFIG.TXN_TYPE_TS);
+            }
             resultProcessor.addResult(execResult[i]);
         }
     }
 
     static class ShutDownHookThread extends Thread{
-        private List<Connection> conns = new ArrayList<Connection>();
-
+        private List<Connection> conns = new ArrayList<>();
+        private List<TransExecutor> executors = new ArrayList<>();
         public void addConnection(Connection connection){
             conns.add(connection);
         }
+        public void addExecutor(TransExecutor executor){}
         @Override
         public void run() {
             CONFIG.TIMEOUT = true;
             LOG.info("Program is shutting down,now will release the resources...");
             try {
                 Thread.sleep(1000);
-                for(int i = 0; i < conns.size();i++){
-                    if(!(conns.get(i) == null || conns.get(i).isClosed() || !conns.get(i).isValid(1000))) {
-                        if (!conns.get(i).getAutoCommit()) {
-                            conns.get(i).rollback();
-                        }
-                        conns.get(i).close();
-                    }
+//                for(int i = 0; i < conns.size();i++){
+//                    if(!(conns.get(i) == null || conns.get(i).isClosed() || !conns.get(i).isValid(1000))) {
+//                        if (!conns.get(i).getAutoCommit()) {
+//                            conns.get(i).rollback();
+//                        }
+//                        conns.get(i).close();
+//                    }
+//                }
+                for(int i = 0; i < executors.size(); i++){
+                    executors.get(i).close();
                 }
                 if(!exit_normally) {
                     LOG.info("write total time = "+transBufferProducer.getWrite_total()+",read total time = "+transBufferProducer.getRead_total());
                     resultProcessor.join();
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (SQLException e) {
                 e.printStackTrace();
             }finally {
                 if(resultProcessor.getTestResult()) {

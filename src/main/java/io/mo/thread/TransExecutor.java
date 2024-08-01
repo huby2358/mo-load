@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 public class TransExecutor implements Runnable {
@@ -85,6 +86,9 @@ public class TransExecutor implements Runnable {
 
     @Override
     public void run() {
+        //wait starting
+        waitStart();
+        
         String currentSql = null;
         PrepareStatmentExecutor currentPrepareExecutor = null;
         
@@ -159,6 +163,8 @@ public class TransExecutor implements Runnable {
                             e.printStackTrace();
                         }
                     }
+                    
+                    waitNextTurn();
                 }
             }
             
@@ -228,6 +234,7 @@ public class TransExecutor implements Runnable {
                             break;
                         } 
                     }
+                    waitNextTurn();
                 }
             }
         }
@@ -236,60 +243,120 @@ public class TransExecutor implements Runnable {
             //如果是非事务模式，直接执行
             //如果没有prepare
             if(!transaction.isPrepared()){
+                if(transaction.getType().equalsIgnoreCase(CONFIG.TXN_TYPE_COMMON)) {
+                    while (!CONFIG.TIMEOUT) {
+                        SQLScript script = transBuffer.getScript();
+                        long currentRequestTime = 0;
+                        try {
+                            long beginTime = System.currentTimeMillis();
+                            for (int i = 0; i < script.length(); i++) {
+                                currentSql = script.getCommand(i);
+                                currentRequestTime = System.currentTimeMillis();
+                                boolean rs = statement.execute(currentSql);
+                            }
+                            long endTime = System.currentTimeMillis();
 
-                while(!CONFIG.TIMEOUT){
-                    SQLScript script = transBuffer.getScript();
-                    long currentRequestTime = 0;
-                    try {
-                        long beginTime = System.currentTimeMillis();
-                        for(int i = 0; i < script.length();i++){
+                            //将执行时间和结果保存在临时缓冲区里
+                            //rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
+                            rtBuffer.setValue(beginTime, endTime);
+                            if (CONFIG.SHORT_CONN_MODE)
+                                reconnect();
+                        } catch (SQLException e) {
+
+                            ErrorMessage errorMessage = new ErrorMessage();
+                            errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
+                            errorMessage.setTxnName(transName);
+                            errorMessage.setSql(currentSql);
+                            errorMessage.setErrorCode(e.getErrorCode());
+                            errorMessage.setErrorMessage(e.getMessage());
+                            if (!this.transaction.isAcceptableError(e.getErrorCode())) {
+                                execResult.setError(errorMessage, false);
+                                LOG.error(errorMessage.toString());
+                            } else {
+                                execResult.setError(errorMessage, true);
+                                errorMessage.setExpected("true");
+                                continue;
+                            }
+
+                            try {
+                                if (connection == null || connection.isClosed() || !connection.isValid(1000)) {
+                                    if (!connection.isClosed()) {
+                                        connection.close();
+                                    }
+                                    connection = ConnectionOperation.getConnection();
+                                    if (connection == null) {
+                                        running = false;
+                                        rtBuffer.setValid(false);
+                                        LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit", id));
+                                        break;
+                                    }
+                                    statement = connection.createStatement();
+                                }
+                            } catch (SQLException e1) {
+                                e1.printStackTrace();
+                            } catch (Exception ex) {
+                                e.printStackTrace();
+                            }
+                        }
+                        waitNextTurn();
+                    }
+                }
+
+                if(transaction.getType().equalsIgnoreCase(CONFIG.TXN_TYPE_TS)) {
+                    while (!CONFIG.TIMEOUT) {
+                        SQLScript script = transBuffer.getScript();
+                        long currentRequestTime = 0;
+                        for (int i = 0; i < script.length(); i++) {
                             currentSql = script.getCommand(i);
                             currentRequestTime = System.currentTimeMillis();
-                            boolean rs = statement.execute(currentSql);
-                        }
-                        long endTime = System.currentTimeMillis();
+                            try {
+                                long beginTime = System.currentTimeMillis();
+                                boolean rs = statement.execute(currentSql);
+                                long endTime = System.currentTimeMillis();
+                                //将执行时间和结果保存在临时缓冲区里
+                                //rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
+                                rtBuffer.setValue(beginTime, endTime);
+                                if (CONFIG.SHORT_CONN_MODE)
+                                    reconnect();
+                            }catch (SQLException e) {
 
-                        //将执行时间和结果保存在临时缓冲区里
-                        //rtBuffer.setValue(transName+"="+beginTime+":"+endTime);
-                        rtBuffer.setValue(beginTime,endTime);
-                        if(CONFIG.SHORT_CONN_MODE)
-                            reconnect();
-                    } catch (SQLException e) {
+                                ErrorMessage errorMessage = new ErrorMessage();
+                                errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
+                                errorMessage.setTxnName(transName);
+                                errorMessage.setSql(currentSql);
+                                errorMessage.setErrorCode(e.getErrorCode());
+                                errorMessage.setErrorMessage(e.getMessage());
+                                if (!this.transaction.isAcceptableError(e.getErrorCode())) {
+                                    execResult.setError(errorMessage, false);
+                                    LOG.error(errorMessage.toString());
+                                } else {
+                                    execResult.setError(errorMessage, true);
+                                    errorMessage.setExpected("true");
+                                    continue;
+                                }
 
-                        ErrorMessage errorMessage = new ErrorMessage();
-                        errorMessage.setRequestTime(simpleDateFormat.format(currentRequestTime));
-                        errorMessage.setTxnName(transName);
-                        errorMessage.setSql(currentSql);
-                        errorMessage.setErrorCode(e.getErrorCode());
-                        errorMessage.setErrorMessage(e.getMessage());
-                        if(!this.transaction.isAcceptableError(e.getErrorCode())){
-                            execResult.setError(errorMessage,false);
-                            LOG.error(errorMessage.toString());
-                        }else {
-                            execResult.setError(errorMessage,true);
-                            errorMessage.setExpected("true");
-                            continue;
-                        }
-                        
-                        try {
-                            if(connection == null || connection.isClosed() || !connection.isValid(1000)) {
-                                if(!connection.isClosed()){
-                                    connection.close();
+                                try {
+                                    if (connection == null || connection.isClosed() || !connection.isValid(1000)) {
+                                        if (!connection.isClosed()) {
+                                            connection.close();
+                                        }
+                                        connection = ConnectionOperation.getConnection();
+                                        if (connection == null) {
+                                            running = false;
+                                            rtBuffer.setValid(false);
+                                            LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit", id));
+                                            break;
+                                        }
+                                        statement = connection.createStatement();
+                                    }
+                                } catch (SQLException e1) {
+                                    e1.printStackTrace();
+                                } catch (Exception ex) {
+                                    e.printStackTrace();
                                 }
-                                connection = ConnectionOperation.getConnection();
-                                if(connection == null){
-                                    running = false;
-                                    rtBuffer.setValid(false);
-                                    LOG.error(String.format("Thread[id=%d] can not get invalid connection after trying 3 times, and will exit",id));
-                                    break;
-                                }
-                                statement = connection.createStatement();
                             }
-                        } catch (SQLException e1) {
-                            e1.printStackTrace();
-                        } catch (Exception ex) {
-                            e.printStackTrace();
                         }
+                        waitNextTurn();
                     }
                 }
             }
@@ -356,10 +423,11 @@ public class TransExecutor implements Runnable {
                             break;
                         }
                     }
+                    waitNextTurn();
                 }
             }
         }
-
+        
         running = false;
         rtBuffer.setValid(false);
         LOG.debug(String.format("Thread[id=%d] has been stoped.",id));
@@ -386,7 +454,58 @@ public class TransExecutor implements Runnable {
             System.exit(0);
         }
     }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
     
+    public void close(){
+        try {
+            while (running){
+                Thread.sleep(1000);
+            }
+            if(!(connection == null || connection.isClosed() || !connection.isValid(1000))) {
+                if (!connection.getAutoCommit()) {
+                    connection.rollback();
+                }
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void waitStart(){
+        int waitTime = this.transaction.getWaitTime();
+        if(waitTime == 0)
+            return;
+    
+        LOG.info(String.format("Thread[%d] is waiting, and will start after %d s, please wait....",id, waitTime));
+        try {
+            Thread.sleep(waitTime*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void waitNextTurn(){
+        int interval = this.transaction.getInterval();
+        if(interval == 0)
+            return;
+
+        try {
+            Thread.sleep(interval*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } 
+    }
+
     public static void main(String[] args){
         System.out.println(simpleDateFormat.format(System.currentTimeMillis()));
     }

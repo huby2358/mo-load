@@ -1,0 +1,4 @@
+replace:
+- name: k1
+  type: file
+  path: replace/index_perf_1000w_k1.txt

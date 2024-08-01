@@ -57,4 +57,12 @@ public class RandomVariable implements Variable {
     public int getEnd() {
         return end;
     }
+    
+    public String getValue(int i){
+        return String.valueOf(start + i);
+    }
+    
+    public int size(){
+        return end - start + 1;
+    }
 }
