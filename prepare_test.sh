@@ -4,7 +4,7 @@
 file_path="prepare"
 
 # 指定的执行顺序
-# script_order=("select_1" "select_star" "select_where" "update" "delete" "insert")
+# script_order=("select_1" "select_star" "select_where" "insert", "update" "delete")
 script_order=("select_1")
 
 # 并发量数组
