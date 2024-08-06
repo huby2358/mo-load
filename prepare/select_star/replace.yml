@@ -1,0 +1,9 @@
+replace:
+- name: id
+  type: sequence
+  start: 1
+  step: 1
+  #scope that para can effect, default is 0
+  #0:transaction, means value of para is stable in a transaction,and will change during different transactions
+  #1:statement, means value of para is stable in a sql statement, and will change during different sql statements
+  scope: 0
