@@ -8,8 +8,8 @@ file_path="prepare"
 script_order=("select_1")
 
 # 并发量数组
-concurrent_array=(1 2 4 8 16 32 64 128 256 512 1024 2048 4096)
-# concurrent_array=(1 2)
+# concurrent_array=(256 512 1024 2048 4096)
+concurrent_array=(1 2)
 
 function execute_task(){
     local script_name=$1
