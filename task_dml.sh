@@ -27,7 +27,7 @@ mysql -h $cn_2_ip   -P 6001 -udump -p111 -e "select mo_ctl('cn', 'task', 'disabl
 sleep 5;
 
 echo "insert with empty no index"
-./start.sh -c ./prepare/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert_with_empty_no_index
 
 mv ${issue_id}_${stats}_disable_insert_with_empty_no_index ${issue_id}/${stats}/
@@ -38,7 +38,7 @@ sleep 5;
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "use t;insert into t select result, result, result from generate_series(1,1000000) g;"
 sleep 5;
 
-./start.sh -c ./prepare/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert_with_100w_no_index
 
 mv ${issue_id}_${stats}_disable_insert_with_100w_no_index ${issue_id}/${stats}/
@@ -50,19 +50,19 @@ mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create da
 sleep 5;
 
 echo "insert"
-./start.sh -c ./prepare/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert
 
 mv ${issue_id}_${stats}_disable_insert ${issue_id}/${stats}/
 
 echo "update"
-./start.sh -c ./prepare/update  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+./start.sh -c ./prepare_dml/update  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_update
 
 mv ${issue_id}_${stats}_disable_update ${issue_id}/${stats}/
 
 echo "delete"
-./start.sh -c ./prepare/delete  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+./start.sh -c ./prepare_dml/delete  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_delete
 
 mv ${issue_id}_${stats}_disable_delete ${issue_id}/${stats}/
