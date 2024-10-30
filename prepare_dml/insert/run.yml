@@ -8,4 +8,4 @@ transaction:
   #transaction的sql语句,可多条
   script:
   - sql: "insert into t values (?, ?, ?);"
-    paras: INT({id})
+    paras: INT({id}),INT({id}),INT({id})

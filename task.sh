@@ -1,5 +1,5 @@
-issue_id="issue_18598"
-namespace="11569435747"
+issue_id="issue_"
+namespace=""
 
 stats="before"
 
@@ -23,6 +23,7 @@ mkdir -p $issue_id/$stats
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int);"
 mysql -h $cn_1_ip -P 6001 -udump -p111 -e "select mo_ctl('cn', 'task', 'disable');"
 mysql -h $cn_2_ip -P 6001 -udump -p111 -e "select mo_ctl('cn', 'task', 'disable');"
+mysql -h $cn_2_ip   -P 6001 -udump -p111 -e "select git_version();"
 
 sleep 5;
 
