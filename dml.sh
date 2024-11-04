@@ -1,7 +1,7 @@
 issue_id="issue_moc4331"
-namespace="11589424111"
+namespace=""
 
-stats="before"
+stats=""
 
 cn_svc_ip=$(kubectl -n mo-checkin-regression-${namespace}  get svc | grep "cn" | grep "6001/TCP"|awk '{print $3}')
 
@@ -28,12 +28,13 @@ mysql -h $cn_2_ip   -P 6001 -udump -p111 -e "select git_version();"
 sleep 5;
 
 echo "insert with empty no index"
+
 ./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert_with_empty_no_index ${cn_1_ip} ${cn_2_ip}
-
 mv ${issue_id}_${stats}_disable_insert_with_empty_no_index ${issue_id}/${stats}/
 
 echo "insert with 100w no index"
+
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int, id3 int);"
 sleep 5;
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "use t;insert into t select result, result, result from generate_series(1,1000000) g;"
@@ -41,31 +42,40 @@ sleep 5;
 
 ./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert_with_100w_no_index ${cn_1_ip} ${cn_2_ip}
-
 mv ${issue_id}_${stats}_disable_insert_with_100w_no_index ${issue_id}/${stats}/
 
 # ------------------------------------------------------------------------------------
-# disable mo_task
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int, id3 int, primary key(id), unique key(id2), key(id3));"
-
 sleep 5;
 
-echo "insert"
-./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
-/root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert ${cn_1_ip} ${cn_2_ip}
+echo "insert with empty indexes"
 
-mv ${issue_id}_${stats}_disable_insert ${issue_id}/${stats}/
+./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+/root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert_with_empty_indexes ${cn_1_ip} ${cn_2_ip}
+mv ${issue_id}_${stats}_disable_insert_with_empty_indexes ${issue_id}/${stats}/
+
+
+mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int, id3 int, primary key(id), unique key(id2), key(id3));"
+sleep 1;
+mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "use t;insert into t select result, result, result from generate_series(1,1000000) g;"
+sleep 5;
+
+echo "insert with 100w indexes"
+
+./start.sh -c ./prepare_dml/insert  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
+/root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_insert_with_empty_indexes ${cn_1_ip} ${cn_2_ip}
+mv ${issue_id}_${stats}_disable_insert_with_empty_indexes ${issue_id}/${stats}/
 
 echo "update"
+
 ./start.sh -c ./prepare_dml/update  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_update ${cn_1_ip} ${cn_2_ip}
-
 mv ${issue_id}_${stats}_disable_update ${issue_id}/${stats}/
 
 echo "delete"
+
 ./start.sh -c ./prepare_dml/delete  -h ${cn_svc_ip} -P 6001  -t 100 -d 10 -b t > time.log &
 /root/jensen/pprof/pprof_collect.sh ${issue_id}_${stats}_disable_delete ${cn_1_ip} ${cn_2_ip}
-
 mv ${issue_id}_${stats}_disable_delete ${issue_id}/${stats}/
 
 clean-mo-cluster mo-checkin-regression-${namespace}

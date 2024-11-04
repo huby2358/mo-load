@@ -1,7 +1,7 @@
 issue_id="issue_"
 namespace=""
 
-stats="before"
+stats=""
 
 cn_svc_ip=$(kubectl -n mo-checkin-regression-${namespace}  get svc | grep "cn" | grep "6001/TCP"|awk '{print $3}')
 
