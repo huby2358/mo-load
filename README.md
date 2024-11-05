@@ -1,4 +1,95 @@
 
+如果要在本地运行`prepare`的子tasks, 请follow 如下指令, 在这之前, 请确保本地已经运行了matrixone, 并且你的环境能正确使用mo-load.
+
+1. 打开prepare_test.sh, 其中有如下内容, 这里的每一项都需要手动填写
+```sh
+issue_id="issue_"
+stats="" # 填写before or after
+is_tke=0 # 如果是本地测试, 需要修改为0
+
+namespace=""
+collectPort=6060
+```
+
+- 假设你在本地对比的是issue_1完成前后的性能差异, 那么`issue_id=issue_1`, `is_tke=0`不需要进行修改
+  - 第一次基于修改前的代码起mo时, 设置`stats=before`, 
+  - 第二次基于修改后的代码起mo时, 设置`stats=after`
+  - namespace在本地跑的时候, 不需要进行设置
+  - collectPort在本地跑的时候, 需要与debug-http的端口一致, 比如我平时习惯用9876, 那么这里就填写`collectPort=9876`, tke上的默认配置是6060
+    ```sh
+    ./mo-service -debug-http :9876 -launch ./etc/launch/launch.toml  > mo-service.log 2>&1 &
+    ```
+
+- 测试流程说明, 依次执行下面所有任务, 每个任务跑10分钟, 100并发
+  1. select 1
+  2. select star
+  3. select where
+  4. insert with empty no index
+  5. insert with 100w no index
+  6. insert with empty contains indexes
+  7. insert with 100w contains indexe
+  8. update
+  9. delete
+
+目前, 如果不想跑所有的流程, 需要手动把其他的流程给注释掉, 在`prepare_test.sh`中, 已经用`# ----`的方式对每个流程进行了分割, 可以根据需要进行注释
+
+e.g. 下面这种方式, 就把`select star`的流程给注释掉了
+- 彭振哥需要注意, 跑QUERY的时候, **应该是需要把DML的所有流程给注释掉**
+```
+# -------------------------------------------------------------------------------------
+#                                       QUERY
+# -------------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------------
+
+echo "select 1"
+
+./start.sh -c ./prepare/select_1 -h ${cn_svc_ip} -P 6001 -t 100 -d 2 -b t >time.log &
+./pprof_collect.sh ${issue_id}_${stats}_select_1 ${cn_1_ip} ${cn_2_ip} ${collectPort}
+mv ${issue_id}_${stats}_select_1 ${issue_id}/${stats}/
+
+# ------------------------------------------------------------------------------------
+
+# echo "select star"
+# 
+# ./start.sh -c ./prepare/select_star -h ${cn_svc_ip} -P 6001 -t 100 -d 2 -b t >time.log &
+# ./pprof_collect.sh ${issue_id}_${stats}_select_star ${cn_1_ip} ${cn_2_ip} ${collectPort}
+# mv ${issue_id}_${stats}_select_star ${issue_id}/${stats}/
+
+# ------------------------------------------------------------------------------------
+
+echo "select where"
+
+./start.sh -c ./prepare/select_where -h ${cn_svc_ip} -P 6001 -t 100 -d 2 -b t >time.log &
+./pprof_collect.sh ${issue_id}_${stats}_select_where ${cn_1_ip} ${cn_2_ip} ${collectPort}
+mv ${issue_id}_${stats}_select_where ${issue_id}/${stats}/
+
+# -------------------------------------------------------------------------------------
+#                                       DML
+# -------------------------------------------------------------------------------------
+```
+
+跑完之后, 会在当前目录下生成一个`issue_1`的文件夹, 里面包含了所有的测试结果, 以及pprof的数据, 格式参阅[这里](https://github.com/matrixorigin/docs/wiki/Prepare%E6%80%A7%E8%83%BD%E8%B7%9F%E8%B8%AA%E7%9A%84%E6%B5%8B%E8%AF%95%E8%AF%B4%E6%98%8E#03-%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E)
+
+pprof文件需要自己打开手动解析, tps的对比, 可以利用`make_excel.py`下的脚本, 请确保使用的python环境有`pandas`库, 这个py文件头部有一个路径需要设置, 设置完成后执行即可, 在当前路径下生成一个md表格.
+```py
+directory_path = "./issue_"
+```
+
+NOTE : 本地现在只支持单个节点的测试, 如果是`tke`环境(`is_tke=1`),脚本会自动根据`namespace`去获取`cn_1_ip`和`cn_2_ip`. 在本地测试的时候, `cn_svc_ip`, `cn_1_ip`, `cn_2_ip`实际上是一样的. 脚本目前还不支持本地起多CN去测. 
+
+```sh
+# 本地采集, 默认使用本地的ip地址
+cn_svc_ip=127.0.0.1
+cn_1_ip=127.0.0.1
+cn_2_ip=127.0.0.1
+```
+
+
+
+*******
+
+
 # What's in MO-Load?
 
 MO-Load is a java-based perforamce test tool for MatrixOne.
