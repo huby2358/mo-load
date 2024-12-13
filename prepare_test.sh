@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # -------------------- NEED FILL --------------------
-issue_id="issue_4332"
+issue_id="issue_1213"
 stats="after" # 填写before or after
 is_tke=1 # 如果是本地测试, 需要修改为0
 
-namespace="12292258314"
+namespace="12312227664"
 collectPort=6060
 
 # -------------------- NEED FILL --------------------
@@ -70,13 +70,13 @@ echo "insert with empty no index"
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int, id3 int);"
 sleep 1
 
-./start.sh -c ./prepare/insert -h ${cn_svc_ip} -P 6001 -t 150 -d 10 -b t >time.log &
+./start.sh -c ./prepare/insert -h ${cn_svc_ip} -P 6001 -t 170 -d 10 -b t >time.log &
 ./pprof_collect.sh ${issue_id}_${stats}_insert_with_empty_no_index ${cn_1_ip} ${cn_2_ip} ${collectPort}
 mv ${issue_id}_${stats}_insert_with_empty_no_index ${issue_id}/${stats}/
 
 # ------------------------------------------------------------------------------------
 
 
-if [ $is_tke -eq 1 ]; then
-    clean-mo-cluster mo-checkin-regression-${namespace}
-fi
+#if [ $is_tke -eq 1 ]; then
+ #   clean-mo-cluster mo-checkin-regression-${namespace}
+#fi
