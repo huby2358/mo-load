@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # -------------------- NEED FILL --------------------
-issue_id="issue_1213"
-stats="after" # 填写before or after
+issue_id="issue_1216"
+stats="before" # 填写before or after
 is_tke=1 # 如果是本地测试, 需要修改为0
 
-namespace="12312227664"
+namespace="12348813932"
 collectPort=6060
 
 # -------------------- NEED FILL --------------------
