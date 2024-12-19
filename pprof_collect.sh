@@ -47,11 +47,12 @@ while true; do
     # cn1
     curl -o "$folder_name/cn_1_${folder_name}_${count}_cpu.out" http://${cn1}:${collectPort}/debug/pprof/profile?seconds=30 >/dev/null 2>&1 &
     curl -o "$folder_name/cn_1_${folder_name}_${count}_heap.out" http://${cn1}:${collectPort}/debug/pprof/heap >/dev/null 2>&1 &
+ curl -o "$folder_name/cn_1_${folder_name}_${count}_cpuoff.out" http://${cn1}:${collectPort}/debug/fgprof/?seconds=30 >/dev/null 2>&1 &
 
     # cn2
    # curl -o "$folder_name/cn_2_${folder_name}_${count}_cpu.out" http://${cn2}:${collectPort}/debug/pprof/profile?seconds=30 >/dev/null 2>&1 &
     # curl -o "$folder_name/cn_2_${folder_name}_${count}_heap.out" http://${cn2}:${collectPort}/debug/pprof/heap >/dev/null 2>&1 &
-
+ #curl -o "$folder_name/cn_2_${folder_name}_${count}_cpuoff.out" http://${cn2}:${collectPort}/debug/fgprof/?seconds=30 >/dev/null 2>&1 &
     sleep 30
 
     # 更新计数器
