@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # -------------------- NEED FILL --------------------
-issue_id="issue_4331"
+issue_id="issue_1220"
 stats="after" # 填写before or after
 is_tke=1 # 如果是本地测试, 需要修改为0
 
-namespace="12273393223"
+namespace="12424186231"
 collectPort=6060
 
 # -------------------- NEED FILL --------------------
@@ -74,14 +74,14 @@ echo "insert with empty no index"
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int, id3 int);"
 sleep 1
 
-parallel=10
+parallel=100
 while true; do
     begin_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     echo 开始时间: "${begin_time} UTC"
     echo 并发度： "${parallel}"
     ./start.sh -c ./prepare/insert -h ${cn_svc_ip} -P 6001 -t ${parallel} -d 5 -b t >time.log 
-    parallel=$((parallel + 10))
-    if [ $parallel -gt 150 ]; then
+    parallel=$((parallel + 100))
+    if [ $parallel -gt 2000 ]; then
         echo "采集完成"
         break
     fi
@@ -109,6 +109,6 @@ done
 
 # ------------------------------------------------------------------------------------
 
-if [ $is_tke -eq 1 ]; then
-    clean-mo-cluster mo-checkin-regression-${namespace}
-fi
+#if [ $is_tke -eq 1 ]; then
+#    clean-mo-cluster mo-checkin-regression-${namespace}
+#fi
