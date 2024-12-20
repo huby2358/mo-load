@@ -74,12 +74,15 @@ echo "insert with empty no index"
 mysql -h $cn_svc_ip -P 6001 -udump -p111 -e "drop database if exists t;create database t;use t;create table t(id int, id2 int, id3 int);"
 sleep 1
 
-parallel=100
+parallel=400
+suffix="_time.log"
 while true; do
     begin_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     echo 开始时间: "${begin_time} UTC"
     echo 并发度： "${parallel}"
-    ./start.sh -c ./prepare/insert -h ${cn_svc_ip} -P 6001 -t ${parallel} -d 5 -b t >time.log 
+    filename="${parallel}${suffix}"
+    ./start.sh -c ./prepare/insert -h ${cn_svc_ip} -P 6001 -t ${parallel} -d 5 -b t >"$filename"
+    mv ./"$filename" $issue_id/$stats/
     parallel=$((parallel + 100))
     if [ $parallel -gt 2000 ]; then
         echo "采集完成"
