@@ -27,9 +27,9 @@ else
 
     echo "基于namespace获取cn的ip地址"
 
-    cn_svc_ip=$(kubectl -n mo-checkin-regression-${namespace} get svc | grep "cn" | grep "6001/TCP" | awk '{print $3}')
+    cn_svc_ip=$(kubectl -n mo-search-nightly-82f78617a-20241223 get svc | grep "cn" | grep "6001/TCP" | awk '{print $3}')
     # 获取 CNSet 的 Pod IP 地址
-    cn_ips=$(kubectl -n mo-checkin-regression-${namespace} get pods -l matrixorigin.io/component=CNSet -o=jsonpath='{.items[*].status.podIP}' | sed 's/ /,/g')
+    cn_ips=$(kubectl -n mo-search-nightly-82f78617a-20241223 get pods -l matrixorigin.io/component=CNSet -o=jsonpath='{.items[*].status.podIP}' | sed 's/ /,/g')
     # 将 IP 地址分割成数组
     IFS=',' read -r -a cn_ip_array <<<"$cn_ips"
     cn_1_ip=${cn_ip_array[0]}
